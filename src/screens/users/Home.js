@@ -5,15 +5,17 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList, S
 import { Divider, Card } from 'react-native-elements';
 import firebase from '../../database/firebase';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+
 const { width, height } = Dimensions.get('window');
-const Home = ({ navigation }) => {
+const Home = (props) => {
     var i = 0;
     const [food, setFood] = useState([])
     const [foodOne, setFoodOne] = useState([])
     const [foodTwo, setFoodTwo] = useState([])
+    const [foodThree, setFoodThree] = useState([])
     const [fQuery, setfQuery] = useState()
     const _searchItem = () => {
-        navigation.navigate('List');
+        props.navigation.navigate('List');
     }
     useEffect(() => {
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
@@ -30,31 +32,30 @@ const Home = ({ navigation }) => {
                     sold,
                     description,
                 })
-                if (i % 2 == 0 && i <= 20) {
-                    foodOne.push({
-                        id: doc.id,
-                        name,
-                        linkImage,
-                        price,
-                        sold,
-                        description,
-                    })
-                }
-                if (i % 2 != 0 && i <= 20) {
-                    foodTwo.push({
-                        id: doc.id,
-                        name,
-                        linkImage,
-                        price,
-                        sold,
-                        description,
-                    })
-                }
-                i++;
             });
+            //get data form firebase
             setFood(food);
-            setFoodOne(foodOne);
-            setFoodTwo(foodTwo);
+            //sort by sold <<
+            const f = food.sort(function(x,y){
+                    return y.sold - x.sold;
+             })
+             
+             //sort by sold >>
+             //get value random
+             const fOne = food.filter((item)=>{
+                return food.length=8;
+             })
+            setFoodOne(fOne);
+             //get top 10 sold
+             const getTop10 = f.filter((item)=>{
+                 return f.length=10;
+             })
+             setFoodTwo(getTop10);
+             //get top 10 sold after
+             const getTop10_20 = f.filter((item)=>{
+                return item.length=10&&item.sold<50;
+            })
+              setFoodThree(getTop10_20);
         })
     }, [])
 
@@ -95,11 +96,11 @@ const Home = ({ navigation }) => {
                             <FlatList showsHorizontalScrollIndicator={false}
                                 horizontal={true}
                                 // keyExtractor={food => food.id}
-                                data={food}
+                                data={foodOne}
                                 renderItem={({ item }) => {
                                     return (
                                         <View>
-                                            <TouchableOpacity onPress={() => navigation.navigate('DetailProduct', { foodId: item.id })}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
                                                 <Image source={{ uri: (item.linkImage) }} style={{ width: 100, height: 100, marginLeft: 20, resizeMode: 'stretch' }} />
                                                 <Text style={{ textAlign: 'center' }}>đ{item.price}</Text>
                                             </TouchableOpacity>
@@ -123,13 +124,13 @@ const Home = ({ navigation }) => {
                         <SafeAreaView  >
                             <FlatList
                                 // keyExtractor={food => food.id}
-                                data={foodOne}
+                                data={foodTwo}
                                 renderItem={({ item }) => {
 
                                     return (
 
                                         <View style={styles.item}>
-                                            <TouchableOpacity onPress={() => navigation.navigate('DetailProduct', { foodId: item.id })}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
                                                 <Image source={{ uri: (item.linkImage) }} style={{ width: 165, height: 180, marginLeft: 0, resizeMode: 'stretch' }} />
                                                 <Divider style={{ backgroundColor: 'white' }} />
                                                 <Text style={{ textAlign: 'center', fontSize: 17 }}>{item.name}</Text>
@@ -151,12 +152,12 @@ const Home = ({ navigation }) => {
                         <SafeAreaView >
                             <FlatList
                                 // keyExtractor={food => food.id}
-                                data={foodTwo}
+                                data={foodThree}
                                 renderItem={({ item }) => {
 
                                     return (
                                         <View style={styles.item}>
-                                            <TouchableOpacity onPress={() => navigation.navigate('DetailProduct', { foodId: item.id })}>
+                                            <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
                                                 <Image source={{ uri: (item.linkImage) }} style={{ width: 165, height: 180, marginLeft: 0, resizeMode: 'stretch' }} />
                                                 <Divider style={{ backgroundColor: 'white' }} />
                                                 <Text style={{ textAlign: 'center', fontSize: 17 }}>{item.name}</Text>

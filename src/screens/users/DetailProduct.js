@@ -121,7 +121,7 @@ const DetailProduct = (props) => {
                                     renderItem={({ item }) => {
 
                                         return (
-                                            <TouchableOpacity onPress={()=>props.navigation.navigate('DetailProduct2',{foodId: item.id})}>
+                                            <TouchableOpacity onPress={()=>props.navigation.replace('DetailProduct2',{foodId: item.id})}>
                                             <View style={styles.item}>
                                                 <Image source={{ uri: (item.linkImage) }} style={{ width: 133, height: 160, marginLeft: 0, resizeMode: 'stretch' }} />
                                                 <Divider style={{ backgroundColor: 'white' }} />
@@ -147,7 +147,7 @@ const DetailProduct = (props) => {
                                     renderItem={({ item }) => {
 
                                         return (
-                                            <TouchableOpacity onPress={()=>props.navigation.navigate('DetailProduct2',{foodId: item.id})}>
+                                            <TouchableOpacity onPress={()=>props.navigation.replace('DetailProduct2',{foodId: item.id})}>
                                             <View style={styles.item}>
                                                 <Image source={{ uri: (item.linkImage) }} style={{  width: 133, height: 160, marginLeft: 0, resizeMode: 'stretch' }} />
                                                 <Divider style={{ backgroundColor: 'white' }} />

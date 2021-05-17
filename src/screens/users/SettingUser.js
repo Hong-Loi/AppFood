@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import * as React from 'react';
 import { ActivityIndicator } from 'react-native';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { Avatar, Card, Divider } from 'react-native-elements';
+import { Avatar, Card, Input } from 'react-native-elements';
 import firebase from '../../database/firebase';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {getUserId} from '../Login';
 
 const SettingUser = (props) => {
     const [user, setUser] = useState();
@@ -27,7 +29,7 @@ const SettingUser = (props) => {
         setLoading(false);
     }
     useEffect(() => {
-        getUserById(props.route.params.userId);
+        getUserById(getUserId());
     }, [])
     //Update this user
     const openConfirmationAlert = () => {
@@ -91,18 +93,18 @@ const SettingUser = (props) => {
             <View style={styles.body}>
                 <Card>
                     <View style={styles.inputGroup}>
-                        <TextInput placeholder="Email user" color='black' fontSize={19}
-                            value={user.email}
+                        <Input placeholder="Email user" color='black' fontSize={19}
+                            value={user.email} leftIcon={<FontAwesome name='envelope' size={24} color='black' errorStyle={{ color: 'red' }} />}
                             onChangeText={(value) => handleChangeText('email', value)} />
                     </View>
                     <View style={styles.inputGroup}>
-                        <TextInput placeholder="Phone User" color='black' fontSize={19}
-                            value={user.phone}
+                        <Input placeholder="Phone User" color='black' fontSize={19}
+                            value={user.phone} leftIcon={<FontAwesome name='phone' size={24} color='black' errorStyle={{ color: 'red' }} />}
                             onChangeText={(value) => handleChangeText('phone', value)} />
                     </View>
                     <View style={styles.inputGroup}>
-                        <TextInput placeholder="Address User" color='black' fontSize={19}
-                            value={user.address}
+                        <Input placeholder="Address User" color='black' fontSize={19}
+                            value={user.address} leftIcon={<FontAwesome name='map' size={24} color='black' errorStyle={{ color: 'red' }} />}
                             onChangeText={(value) => handleChangeText('address', value)} />
                     </View>
                 
@@ -157,9 +159,8 @@ const styles = StyleSheet.create({
     inputGroup: {
 
         padding: 0,
-        marginBottom: 30,
-        borderBottomWidth: 2,
-        borderBottomColor: 'red',
+        marginBottom: 2,
+    
 
     },
 

@@ -17,12 +17,12 @@ import ManageDetailUsers from './src/screens/admin/ManageDetailUsers';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import DetailProduct from './src/screens/users/DetailProduct';
 import DetailProduct2 from './src/screens/users/DetailProduct2';
-import DetailProduct3 from './src/screens/users/DetailProduct3';
 import CartScreen from './src/screens/users/CartScreen';
 import ManageFoods from './src/screens/admin/ManageFoods';
 import SettingUser from './src/screens/users/SettingUser';
 import ChangePassword from './src/screens/users/ChangePassword';
 import CreateFood from './src/screens/admin/CreateFood';
+import Introduce from './src/screens/users/Introduce';
 
 
 const Stack = createStackNavigator();
@@ -33,10 +33,10 @@ const Tab = createBottomTabNavigator();
 function MyStackOfUser(){
   return (
     <Tab.Navigator tabBarOptions={{labelStyle:{ fontSize: 14}, activeTintColor: '#FF0000', inactiveTintColor: 'black'}}>
-      <Tab.Screen  name="Home" component={Home} initialParams={{idUser: 'Không truy cập được thông tin'}} options={{tabBarLabel: 'Trang chủ', fontSize: 1, tabBarIcon: ({color}) => <Ionicons name='home' size={22} color={color} />}}/>
-      <Tab.Screen name="List" component={List} options={{tabBarLabel: 'Danh mục', tabBarIcon: ({color}) => <FontAwesome name='list' size={23} color={color} />}} />
-      <Tab.Screen name="Love" component={Love} options={{tabBarLabel: 'Yêu thích', tabBarIcon: ({color}) => <FontAwesome name='heart' size={23} color={color} />}} />
-      <Tab.Screen name="YourAccount" component={YourAccount} options={{tabBarLabel: 'Tôi', tabBarIcon: ({color}) => <FontAwesome name='user' size={23} color={color} />}} />
+      <Tab.Screen  name="Home" component={Home} initialRouteName={{userId:'Chua ton tai'}}  options={{tabBarLabel: 'Trang chủ', fontSize: 1, tabBarIcon: ({color}) => <Ionicons name='home' size={22} color={color} />}}/>
+      <Tab.Screen name="List" component={List} initialRouteName={{userId:'Chua ton tai'}}  options={{tabBarLabel: 'Danh mục', tabBarIcon: ({color}) => <FontAwesome name='list' size={23} color={color} />}} />
+      <Tab.Screen name="Love" component={Love} initialRouteName={{userId:'Chua ton tai'}}  options={{tabBarLabel: 'Yêu thích', tabBarIcon: ({color}) => <FontAwesome name='heart' size={23} color={color} />}} />
+      <Tab.Screen name="YourAccount" initialRouteName={{userId:'Chua ton tai', name: 'loi'}}  component={YourAccount} options={{tabBarLabel: 'Tôi', tabBarIcon: ({color}) => <FontAwesome name='user' size={23} color={color} />}} />
     </Tab.Navigator>
   )
 }
@@ -54,7 +54,7 @@ function MyStackOfAdmin(){
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="CartScreen" screenOptions={{
+    <Stack.Navigator initialRouteName="Login" screenOptions={{
         headerStyle: {
           backgroundColor: '#f4511e',
         },
@@ -70,10 +70,10 @@ export default function App() {
       <Stack.Screen name="Home" component={MyStackOfUser}  options={{title: 'Home', headerShown: false}} />
       <Stack.Screen name="DetailProduct" component={DetailProduct} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="DetailProduct2" component={DetailProduct2} options={{title: 'Chi tiết sản phẩm'}} />
-      <Stack.Screen name="DetailProduct3" component={DetailProduct3} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="SettingUser" component={SettingUser} options={{title: 'Cài đặt tài khoản'}} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} options={{title: 'Đổi mật khẩu'}} />
       <Stack.Screen name="CartScreen" component={CartScreen} options={{title: 'Giỏ hàng'}} />
+      <Stack.Screen name="Introduce" component={Introduce} options={{title: 'Giới thiệu'}} />
        {/* Using this when login admin successfull */}
        <Stack.Screen name="HomeAdmin" component={MyStackOfAdmin} options={{title: 'Home', headerShown: false}} />
        <Stack.Screen name="ManageDetailUsers" component={ManageDetailUsers} options={{title: 'Manage user'}} />

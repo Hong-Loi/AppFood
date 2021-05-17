@@ -1,18 +1,17 @@
-import * as React from 'react';
+import React, {useState} from 'react';
 import {View, Text, Button} from 'react-native';
 
-
-const Love = ({ navigation})=>{
-    return (
+export default class Love extends React.Component {
+    _getId(){        
+        console.log(this.props.route.params.userId);
+        return this.props.route.params.userId;
+    }
+    render() {
+      return (
         <View>
-            <Text>
-                Thi is pgage you like
-            </Text>
-            <Button title="Go to Home" onPress={() => navigation.navigate('Home')} />
-            
-           
+            <Button title='Click me' onPress={()=>this._getId()}/>
+
         </View>
-       
-    )
-}
-export default Love;
+      );
+    }
+  }

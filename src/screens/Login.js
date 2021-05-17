@@ -5,6 +5,7 @@ import { Input } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../database/firebase';
 
+let getId = '';
 const Login = (props) => {
   //user
   const [user, setUser] = useState([])
@@ -37,10 +38,11 @@ const Login = (props) => {
       var x = false;
       user.forEach((item) => {
         if (state.email == item.email && state.password == item.password) {
+          getId=item.id;
           props.navigation.navigate('Home',{
-            screen: 'YourAccount',
+            screen: 'Home',
             params: {userId: item.id}
-          } 
+          } ,
           );
           x = true;
 
@@ -88,7 +90,9 @@ const Login = (props) => {
     </View>
   )
 };
-
+export const getUserId = () =>{
+  return getId;
+}
 const styles = StyleSheet.create({
   sT1: {
     color: 'white',

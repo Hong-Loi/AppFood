@@ -1,12 +1,29 @@
-import React, { useState } from "react";
-import { ImageBackground, StyleSheet, Text, View, Image, Button, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { ImageBackground, StyleSheet, Text, View, Image, Button, Keyboard } from "react-native";
 import { Input } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../database/firebase';
 
 
 const Register = ({ navigation, route }) => {
- 
+  //check user email valid
+  const [user, setUser] = useState([])
+
+  useEffect(() => {
+    firebase.db.collection('tusers').onSnapshot(querySnapshot => {
+      const user = [];
+      querySnapshot.docs.forEach(doc => {
+        const { email, password, phone, address } = doc.data();
+        user.push({
+          email,
+        })
+      });
+      setUser(user);
+      console.log(user);
+    })
+  }, [])
+  //Handle register
+
   const [state, setState] = useState({
     email: '',
     password: '',
@@ -17,13 +34,39 @@ const Register = ({ navigation, route }) => {
   const handleChangeText = (name, value) => {
     setState({ ...state, [name]: value })
   }
+  //check valid for email
+  const checkEmailMatch = () => {
+    var check = 0;
+     user.filter((item) => {
+      if (item.email === state.email) {
+        check++;
+      }
+    })
+    if(check>0){
+      console.log(check);
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
+
   const saveNewUser = async () => {
-    if (state.email === ''||state.address === '' || state.password===''
-    ||state.rpassword ==='' || state.phone === '') {
+    if (state.email === '' || state.address === '' || state.password === ''
+      || state.rpassword === '' || state.phone === '') {
       alert('Bạn không được để trống!');
-    } 
-    else if(state.password != state.rpassword){
+    }
+    else if (checkEmailMatch() == false) {
+          alert('Email đã tồn tại')
+    }
+    else if (state.password.length < 6 || state.rpassword.length < 6) {
+      alert('Mật khẩu phải lớn hơn 6 ký tự');
+    }
+    else if (state.password != state.rpassword) {
       alert('Xác nhận mật khẩu không trùng!');
+    }
+    else if (state.address.length < 10) {
+      alert('Địa chỉ phải lớn hơn 10 ký tự');
     }
     else {
       try {
@@ -44,19 +87,19 @@ const Register = ({ navigation, route }) => {
     <View style={styles.container}>
       <ImageBackground source={require('../images/main.jpg')} style={styles.image}>
 
-        <View style={styles.body}>
+        <View style={styles.body} onPress={() => Keyboard.dismiss()}>
           <Image style={styles.imageIcon} source={require('../images/ham.png')} />
         </View>
         <View style={styles.body2}>
           <Input style={styles.textIn} placeholder='Nhập email' placeholderTextColor="yellow" autoCorrect={false} leftIcon={<FontAwesome name='envelope' size={24} color='red' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('email', value)} />
           <Input style={styles.textIn} secureTextEntry={true} placeholder='Nhập mật khẩu ' autoCorrect={false} placeholderTextColor="yellow" leftIcon={<FontAwesome name='lock' size={30} color='red' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('password', value)} />
           <Input style={styles.textIn} secureTextEntry={true} placeholder='Xác nhận mật khẩu' autoCorrect={false} placeholderTextColor="yellow" leftIcon={<FontAwesome name='lock' size={30} color='red' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('rpassword', value)} />
-          <Input style={styles.textIn} placeholder='Số điện thoại' placeholderTextColor="yellow" autoCorrect={false} leftIcon={<FontAwesome name='phone' size={24} color='red' errorStyle={{ color: 'red' }}/>} onChangeText={(value) => handleChangeText('phone', value)} />
+          <Input style={styles.textIn} keyboardType='number-pad' placeholder='Số điện thoại' placeholderTextColor="yellow" autoCorrect={false} leftIcon={<FontAwesome name='phone' size={24} color='red' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('phone', value)} />
           <Input style={styles.textIn} placeholder='Địa chỉ' placeholderTextColor="yellow" autoCorrect={false} leftIcon={<FontAwesome name='map' size={24} color='red' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('address', value)} />
         </View>
         {/* Handle Button */}
         <View style={styles.sButton}>
-          <Button color='white' title='Đăng ký' onPress={()=>saveNewUser()}/>
+          <Button color='white' title='Đăng ký' onPress={() => saveNewUser()} />
         </View>
         {/* Handle button register */}
 

@@ -5,8 +5,11 @@ import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { Avatar, Card, Divider } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../../database/firebase';
+import {getUserId} from '../Login';
 
 const YourAccount = (props) => {
+    
+    var userId = getUserId();
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(true)
 
@@ -15,7 +18,6 @@ const YourAccount = (props) => {
         const doc = await dbRef.get();
         const user = doc.data();
 
-       console.log(user);
         setUser({
             ...user,
             id: doc.id
@@ -23,7 +25,7 @@ const YourAccount = (props) => {
         setLoading(false);
     }
     useEffect(() => {
-        getUserById(props.route.params.userId);
+        getUserById(userId);
     }, [])
     if(loading){
         return(
@@ -67,19 +69,20 @@ const YourAccount = (props) => {
                         </View>
                     </TouchableOpacity>
                     {/* Suppport */}
-                    <TouchableOpacity>
+                    <TouchableOpacity >
                         <View style={styles.c1}>
                             <Text style={styles.t1}><FontAwesome name='medkit' size={23} color='black' />   Hỗ trợ</Text>
                             <Divider style={{ backgroundColor: 'black', marginTop: 20 }} />
                         </View>
                     </TouchableOpacity>
                     {/* Introduction */}
-                    <TouchableOpacity>
-                        <View style={styles.c2}>
-                            <Text style={styles.t1}><FontAwesome name='certificate' size={23} color='black' />   Giới thiệu  </Text>
+                    <TouchableOpacity onPress={()=>props.navigation.navigate('Introduce')}>
+                        <View style={styles.c1}>
+                            <Text style={styles.t1}><FontAwesome name='certificate' size={23} color='black' />   Giới thiệu</Text>
+                            <Divider style={{ backgroundColor: 'black', marginTop: 20 }} />
                         </View>
                     </TouchableOpacity>
-
+                   
                 </Card>
             </View>
             {/* Footer */}
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     body: {
-        flex: 5,
+        flex: 7,
         marginTop: 40
     },
     footer: {
@@ -135,7 +138,8 @@ const styles = StyleSheet.create({
         height: 70
     },
     c2: {
-        height: 30
+        height: 80
+        ,backgroundColor:'red'
     },
     t1: {
         color: 'black',
