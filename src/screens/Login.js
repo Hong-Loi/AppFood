@@ -6,6 +6,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../database/firebase';
 
 let getId = '';
+let getLike='';
 const Login = (props) => {
   //user
   const [user, setUser] = useState([])
@@ -15,12 +16,13 @@ const Login = (props) => {
       const user = [];
       querySnapshot.docs.forEach(doc => {
         console.log(doc.data())
-        const { email, password, role } = doc.data();
+        const { email, password, role, userLike } = doc.data();
         user.push({
           id: doc.id,
           email,
           password,
-          role
+          role,
+          userLike
         })
 
       });
@@ -42,6 +44,7 @@ const Login = (props) => {
       user.forEach((item) => {    
         if (state.email == item.email && state.password == item.password) {
           getId=item.id;
+          getLike=item.userLike;
           //IF role = 0  then to admin
           if(item.role===1){
             props.navigation.navigate('HomeAdmin',{
@@ -53,7 +56,7 @@ const Login = (props) => {
           
           }
           else {
-            props.navigation.navigate('Home',{
+            props.navigation.replace('Home',{
               screen: 'Home',
               params: {userId: item.id}
             } ,
@@ -110,6 +113,9 @@ const Login = (props) => {
 };
 export const getUserId = () =>{
   return getId;
+}
+export const getUserLike = ()=>{
+ return getLike;
 }
 const styles = StyleSheet.create({
   sT1: {

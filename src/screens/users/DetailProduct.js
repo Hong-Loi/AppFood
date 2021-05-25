@@ -120,7 +120,7 @@ const DetailProduct = (props) => {
         //if user is not like this food
         var getItemIdLike = user.userLike.split("-");
         let showArr = getItemIdLike.filter((item)=>{
-            return item!='undefined';
+            return item!='noData';
         })
         //Check food vaild in list 
         let check=false;

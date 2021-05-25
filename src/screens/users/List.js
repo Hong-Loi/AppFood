@@ -75,7 +75,7 @@ const List = (props) => {
         if (query == '') {
             setDataSouce(food);
         } else {
-            // var toQuery = tQuery.toLowerCase();
+            // var toQuery = query.toLowerCase().toString();
             var toQuery = query;
             var newData = food.filter(l => l.name.toLowerCase().match(toQuery));
             setDataSouce(newData);
@@ -103,7 +103,7 @@ const List = (props) => {
                     style={styles.input}
                 />
                 <TouchableOpacity onPress={() => _search()}>
-                    <FontAwesome style={{ paddingHorizontal: 10 }} name='search' size={24} color='black' />
+                    <FontAwesome style={{ paddingHorizontal: 10 }} name='shopping-cart' size={28} color='black' />
                 </TouchableOpacity>
             </View>
             <FlatList
@@ -124,7 +124,7 @@ const List = (props) => {
                                     <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                                         <Text style={styles.author}>đ{item.price}</Text>
                                         <TouchableOpacity  style={{ marginRight: 30 }}>
-                                            <FontAwesome name='cart-plus' size={35} color={color} />
+                                            <FontAwesome name='cart-plus' size={32} color={color} />
                                         </TouchableOpacity>
                                     </View>
 

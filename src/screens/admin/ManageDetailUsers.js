@@ -54,7 +54,8 @@ const ManageDetailUsers = (props) => {
             phone: user.phone,
             address: user.address,
             role: 0,
-           imageUser: user.imageUser
+           imageUser: user.imageUser,
+           userLike: user.userLike
         })
         setUser(initialState);
         props.navigation.navigate('HomeAdmin');

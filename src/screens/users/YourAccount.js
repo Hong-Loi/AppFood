@@ -88,7 +88,7 @@ const YourAccount = (props) => {
             {/* Footer */}
             <View style={styles.footer}>
                 <View style={{ flex: 0.5, backgroundColor: '#ff5b77', justifyContent: 'center', }}>
-                    <Button color='white' title='Đăng xuất' onPress={() => props.navigation.navigate('Login')} />
+                    <Button color='white' title='Đăng xuất' onPress={() => props.navigation.replace('Login')} />
                 </View>
             </View>
         </View>
