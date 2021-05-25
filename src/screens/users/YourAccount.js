@@ -40,7 +40,7 @@ const YourAccount = (props) => {
             <View style={styles.head}>
                 <Avatar
                     rounded
-                    source={require('../../images/user.jpg')}
+                    source={{uri: (user.imageUser)}}
                     style={styles.sAvatar}
                     size="large"
                 />
@@ -69,7 +69,7 @@ const YourAccount = (props) => {
                         </View>
                     </TouchableOpacity>
                     {/* Suppport */}
-                    <TouchableOpacity >
+                    <TouchableOpacity onPress={()=>props.navigation.navigate('Support')}>
                         <View style={styles.c1}>
                             <Text style={styles.t1}><FontAwesome name='medkit' size={23} color='black' />   Hỗ trợ</Text>
                             <Divider style={{ backgroundColor: 'black', marginTop: 20 }} />

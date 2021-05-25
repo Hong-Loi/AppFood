@@ -39,7 +39,6 @@ const ManageDetailUsers = (props) => {
         const dbRef = firebase.db.collection('tusers').doc(props.route.params.userId);
         await dbRef.delete();
         props.navigation.navigate('HomeAdmin');
-        alert('ok');
     }
     const openConfirmationAlert = () => {
         Alert.alert('Remove the user', 'Are you sure? ', [
@@ -53,7 +52,9 @@ const ManageDetailUsers = (props) => {
             password: user.password,
             email: user.email,
             phone: user.phone,
-            address: user.address
+            address: user.address,
+            role: 0,
+           imageUser: user.imageUser
         })
         setUser(initialState);
         props.navigation.navigate('HomeAdmin');

@@ -8,8 +8,9 @@ import firebase from '../database/firebase';
 const Register = ({ navigation, route }) => {
   //check user email valid
   const [user, setUser] = useState([])
-
+ 
   useEffect(() => {
+    let isMounted = true;
     firebase.db.collection('tusers').onSnapshot(querySnapshot => {
       const user = [];
       querySnapshot.docs.forEach(doc => {
@@ -21,6 +22,7 @@ const Register = ({ navigation, route }) => {
       setUser(user);
       console.log(user);
     })
+    return () => { isMounted = false };
   }, [])
   //Handle register
 
@@ -74,7 +76,10 @@ const Register = ({ navigation, route }) => {
           email: state.email,
           password: state.password,
           phone: state.phone,
-          address: state.address
+          address: state.address,
+          role: 0,
+          imageUser: 'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png',
+          userLike:'noData',
         })
         alert('Bạn đã đăng ký thành công^^');
         navigation.navigate('Login');

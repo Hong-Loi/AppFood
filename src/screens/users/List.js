@@ -1,6 +1,6 @@
 
 
-import React, {  useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -15,33 +15,49 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const { width, height } = Dimensions.get('window');
 import firebase from '../../database/firebase';
+import {getUserId} from '../Login';
 
 
 const List = (props) => {
+    var userId = getUserId();
     //Get value of firebase
-    const [food, setFood] = useState([])
-  
+    const [food, setFood] = useState([]);
+    const [color, setColor] = useState();
+    const [user, setUser] = useState();
+    const getUserById = async (id) => {
+        const dbRef = firebase.db.collection('tusers').doc(id);
+        const doc = await dbRef.get();
+        const user = doc.data();
+
+          console.log(user);
+        setUser({
+            ...user,
+            id: doc.id
+        })
+    }
     useEffect(() => {
         firebase.db.collection('foods').onSnapshot(querySnapshot => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
-                const { name, linkImage, price,description } = doc.data();
+                const { name, linkImage, price, description, sold } = doc.data();
                 food.push({
                     id: doc.id,
                     name,
                     linkImage,
                     price,
-                    description
+                    description,
+                    sold
                 })
             });
             setFood(food);
+            getUserById(userId);
             setDataSouce(food);
         })
     }, [])
     //Handle seacrch
     const [query, setQuery] = useState();
     const [dataSouce, setDataSouce] = useState([]);
-    const  nonAccentVietnamese = (str) =>{
+    const nonAccentVietnamese = (str) => {
         str = str.toLowerCase();
         str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
         str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
@@ -60,8 +76,8 @@ const List = (props) => {
             setDataSouce(food);
         } else {
             // var toQuery = tQuery.toLowerCase();
-            var toQuery  = query;
-            var  newData = food.filter(l => l.name.toLowerCase().match(toQuery));
+            var toQuery = query;
+            var newData = food.filter(l => l.name.toLowerCase().match(toQuery));
             setDataSouce(newData);
         }
     };
@@ -70,8 +86,10 @@ const List = (props) => {
             <View style={{ height: 10, width: '100%', backgroundColor: '#e5e5e5' }} />
         );
     };
+    //handle food user like
+ 
+  
 
-   
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -81,12 +99,12 @@ const List = (props) => {
                     placeholderTextColor="gray"
                     value={query}
                     onChangeText={(query) => setQuery(query)}
-                    onChange={()=>_search()}
+                    onChange={() => _search()}
                     style={styles.input}
                 />
-               <TouchableOpacity  onPress={()=>_search()}>
-               <FontAwesome style={{paddingHorizontal: 10}} name='search' size={24} color='black' />
-               </TouchableOpacity>
+                <TouchableOpacity onPress={() => _search()}>
+                    <FontAwesome style={{ paddingHorizontal: 10 }} name='search' size={24} color='black' />
+                </TouchableOpacity>
             </View>
             <FlatList
                 data={dataSouce}
@@ -94,18 +112,24 @@ const List = (props) => {
                 renderItem={({ item, index }) => {
                     return (
                         <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
-                        <View style={styles.bookContainer}>
-                            <Image style={styles.image} source={{uri:(item.linkImage)}} />
-                            <View style={styles.dataContainer}>
-                                <Text numberOfLines={1} style={styles.title}>
-                                    {item.name}
-                                </Text>
-                                <Text numberOfLines={4} style={styles.description}>
-                                    {item.description}
-                                </Text>
-                                <Text style={styles.author}>đ{item.price}</Text>
+                            <View style={styles.bookContainer}>
+                                <Image style={styles.image} source={{ uri: (item.linkImage) }} />
+                                <View style={styles.dataContainer}>
+                                    <Text numberOfLines={1} style={styles.title}>
+                                        {item.name}
+                                    </Text>
+                                    <Text numberOfLines={4} style={styles.description}>
+                                        Đã bán:  {item.sold}
+                                    </Text>
+                                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                        <Text style={styles.author}>đ{item.price}</Text>
+                                        <TouchableOpacity  style={{ marginRight: 30 }}>
+                                            <FontAwesome name='cart-plus' size={35} color={color} />
+                                        </TouchableOpacity>
+                                    </View>
+
+                                </View>
                             </View>
-                        </View>
                         </TouchableOpacity>
                     );
                 }}
@@ -138,11 +162,11 @@ const styles = StyleSheet.create({
     },
     bookContainer: {
         flexDirection: 'row',
-        padding: 5,
+
     },
     image: {
-        height: 140,
-        width: 95,
+        height: 100,
+        width: 120,
     },
     dataContainer: {
         padding: 10,
@@ -159,9 +183,9 @@ const styles = StyleSheet.create({
         color: 'gray',
     },
     author: {
-        fontSize: 16,
-        textAlign: 'right',
-        paddingTop: 10,
+        fontSize: 18,
+        textAlign: 'left',
+        paddingTop: 15,
         color: '#fe6132'
     },
 });

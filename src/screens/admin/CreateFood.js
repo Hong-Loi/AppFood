@@ -1,3 +1,4 @@
+import { size } from "lodash";
 import React, { useState } from "react";
 import { ImageBackground, StyleSheet, TextInput, View, Image, Button, TouchableOpacity } from "react-native";
 import { Input, Avatar } from 'react-native-elements';
@@ -11,8 +12,9 @@ const CreateFood = ({ navigation }) => {
     name: '',
     linkImage: '',
     price: '',
-    sold: '',
+    amount: '',
     description: '',
+   
   })
   const handleChangeText = (name, value) => {
     setState({ ...state, [name]: value })
@@ -28,8 +30,11 @@ const CreateFood = ({ navigation }) => {
           name: state.name,
           linkImage: state.linkImage,
           price: state.price,
-          sold: state.sold,
-          description: state.description
+          sold: 0,
+          description: state.description,
+          view: 0,
+          amount: state.amount,
+          createdAt: new Date().toLocaleDateString()
         })
         navigation.navigate('FoodAdmin');
       } catch (error) {
@@ -38,28 +43,25 @@ const CreateFood = ({ navigation }) => {
     }
   }
   return (
-    <ScrollView>
-      <View style={styles.container}>
-
-
+    <View  style={styles.container}>
+      <ScrollView>
           <View style={styles.body2}>
-            <Input style={styles.textIn} placeholder='Tên món ăn' placeholderTextColor="gray" autoCorrect={false} leftIcon={<FontAwesome name='file' size={24} color='orange' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('name', value)} />
-            <Input style={styles.textIn} placeholder='Đường dẫn ' autoCorrect={false} placeholderTextColor="gray" leftIcon={<FontAwesome name='link' size={30} color='orange' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('linkImage', value)} />
-            <Input style={styles.textIn} placeholder='Giá' autoCorrect={false} placeholderTextColor="gray" leftIcon={<FontAwesome name='tag' size={30} color='orange' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('price', value)} />
-            <Input style={styles.textIn} placeholder='Số lượng đã bán' placeholderTextColor="gray" autoCorrect={false} leftIcon={<FontAwesome name='certificate' size={24} color='orange' errorStyle={{ color: 'red' }} />} onChangeText={(value) => handleChangeText('sold', value)} />
-           <View style={{marginTop: 5,}}>
-           <Input style={styles.textIn} multiline numberOfLines={10} maxLength={500} autoCorrect={false} placeholder='Description' placeholderTextColor="gray" leftIcon={<FontAwesome name='buysellads' size={24} color='orange' errorStyle={{ color: 'gray' }} />} onChangeText={(value) => handleChangeText('desctiption', value)} />
-           </View>
-
+          <Input label="Tên món ăn" placeholder='Tên món ăn'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'forum', }} onChangeText={(value) => handleChangeText('name', value)} />
+          <Input label="Hình ảnh món ăn" placeholder='Đường dẫn'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'polymer', }} onChangeText={(value) => handleChangeText('linkImage', value)} />
+          <Input keyboardType='number-pad' label="Giá món ăn" placeholder='0'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'euro', }} onChangeText={(value) => handleChangeText('price', value)} />
+          <Input keyboardType='number-pad' label="Số lượng" placeholder='0'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'dock', }} onChangeText={(value) => handleChangeText('amount', value)} />
+           <Input  multiline numberOfLines={8} label="Mô tả" maxLength={500} autoCorrect={false} placeholder='Mô tả' leftIcon={{ type: 'material', name: 'description', }} onChangeText={(value) => handleChangeText('description', value)} />
           </View>
           {/* Handle Button */}
-          <View style={styles.sButton}>
-            <Button color='red' title='Thêm món ăn' onPress={() => saveNewFood()} />
-          </View>
+          
           {/* Handle button register */}
 
-      </View>
+
     </ScrollView>
+    <View style={styles.sButton}>
+    <Button color='red' title='Thêm món ăn' onPress={() => saveNewFood()} />
+  </View>
+    </View>
   )
 };
 
@@ -75,14 +77,16 @@ const styles = StyleSheet.create({
   },
   sButton: {
     backgroundColor: '#66FF66',
-    marginTop: 40,
     fontSize: 20,
-    borderRadius: 50
+    borderRadius: 50,
+    padding: 10,
+    marginBottom: 10,
+    marginHorizontal: 20
   },
   container: {
     flex: 1,
-    flexDirection: "column",
-
+    padding: 20
+    
   },
   body2: {
     marginTop: 10,

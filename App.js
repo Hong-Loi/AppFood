@@ -23,6 +23,7 @@ import SettingUser from './src/screens/users/SettingUser';
 import ChangePassword from './src/screens/users/ChangePassword';
 import CreateFood from './src/screens/admin/CreateFood';
 import Introduce from './src/screens/users/Introduce';
+import Support from './src/screens/users/Support';
 
 
 const Stack = createStackNavigator();
@@ -74,6 +75,7 @@ export default function App() {
       <Stack.Screen name="ChangePassword" component={ChangePassword} options={{title: 'Đổi mật khẩu'}} />
       <Stack.Screen name="CartScreen" component={CartScreen} options={{title: 'Giỏ hàng'}} />
       <Stack.Screen name="Introduce" component={Introduce} options={{title: 'Giới thiệu'}} />
+      <Stack.Screen name="Support" component={Support} options={{title: 'Trợ giúp'}} />
        {/* Using this when login admin successfull */}
        <Stack.Screen name="HomeAdmin" component={MyStackOfAdmin} options={{title: 'Home', headerShown: false}} />
        <Stack.Screen name="ManageDetailUsers" component={ManageDetailUsers} options={{title: 'Manage user'}} />

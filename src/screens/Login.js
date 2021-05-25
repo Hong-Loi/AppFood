@@ -10,19 +10,22 @@ const Login = (props) => {
   //user
   const [user, setUser] = useState([])
   useEffect(() => {
+    let isMounted = true;
     firebase.db.collection('tusers').onSnapshot(querySnapshot => {
       const user = [];
       querySnapshot.docs.forEach(doc => {
-        // console.log(doc.data())
-        const { email, password } = doc.data();
+        console.log(doc.data())
+        const { email, password, role } = doc.data();
         user.push({
           id: doc.id,
           email,
-          password
+          password,
+          role
         })
 
       });
       setUser(user);
+      return () => { isMounted = false }; 
     })
   }, [])
   //Check login
@@ -35,21 +38,36 @@ const Login = (props) => {
       props.navigation.navigate('HomeAdmin');
     }
     else {
-      var x = false;
-      user.forEach((item) => {
+      var x = -1;
+      user.forEach((item) => {    
         if (state.email == item.email && state.password == item.password) {
           getId=item.id;
-          props.navigation.navigate('Home',{
-            screen: 'Home',
-            params: {userId: item.id}
-          } ,
-          );
-          x = true;
-
+          //IF role = 0  then to admin
+          if(item.role===1){
+            props.navigation.navigate('HomeAdmin',{
+              screen: 'HomeAdmin',
+              params: {userId: item.id}
+            } ,
+            );
+            x=0;
+          
+          }
+          else {
+            props.navigation.navigate('Home',{
+              screen: 'Home',
+              params: {userId: item.id}
+            } ,
+            );
+            x = 1;
+          }
+        
         }
       })
-      //Alert for success
-      if (x == false) {
+      // Alert for success
+      if (x == 0) {
+        alert('Bạn đã đăng nhập với tư cách quản trị viên');
+      }
+      else if(x==-1){
         alert('Tài khoản hoặc mật khẩu của bạn không chính xác');
       }
 

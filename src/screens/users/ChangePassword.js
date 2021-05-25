@@ -70,7 +70,9 @@ const ChangePassword = (props) => {
                     email: user.email,
                     phone: user.phone,
                     address: user.address,
-                    password: newPassword.cPassword
+                    password: newPassword.cPassword,
+                    role: 0,
+                    imageUser: user.imageUser
                 })
                 setUser(initialState);
             } catch (error) {

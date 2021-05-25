@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { View, Text, StyleSheet, ScrollView, Image, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import firebase from '../../database/firebase';
-import { Input, Avatar } from 'react-native-elements';
+import { Input, Avatar, Button,Card } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 
@@ -12,7 +12,7 @@ const ManageFoods = (props) => {
         name: '',
         linkImage: '',
         price: '',
-        sold: '',
+        amount: '',
         description: ''
 
     }
@@ -57,6 +57,9 @@ const ManageFoods = (props) => {
             price: food.price,
             sold: food.sold,
             description: food.description,
+            view: food.view,
+            amount: food.amount,
+            createdAt: food.createdAt
         })
         setFood(initialState);
         props.navigation.navigate('FoodAdmin');
@@ -70,38 +73,51 @@ const ManageFoods = (props) => {
         )
     }
     return (
-        <ScrollView>
-            <View style={styles.container}>
-            {/* Title */}
-            <View style={styles.header}>
-                 <Avatar rounded style={styles.sImage} source={{uri: (food.linkImage)}}/>
-            </View>
-            {/* body */}
-            <View style={styles.body}>
-            <Input style={styles.textIn} value={food.name} autoCorrect={false} placeholder='Tên món ăn' placeholderTextColor="gray" leftIcon={<FontAwesome name='file' size={24} color='black' errorStyle={{ color: 'gray' }} />} onChangeText={(value) => handleChangeText('name', value)} />
-            <Input style={styles.textIn} value={food.linkImage} autoCorrect={false} placeholder='Link hình ảnh' placeholderTextColor="gray" leftIcon={<FontAwesome name='link' size={24} color='black' errorStyle={{ color: 'gray' }} />} onChangeText={(value) => handleChangeText('linkImage', value)} />
-            <Input style={styles.textIn} value={food.price} autoCorrect={false} placeholder='Giá' placeholderTextColor="gray" leftIcon={<FontAwesome name='tag' size={24} color='black' errorStyle={{ color: 'gray' }} />} onChangeText={(value) => handleChangeText('price', value)} />
-            <Input style={styles.textIn} value={food.sold} autoCorrect={false} placeholder='Đã bán' placeholderTextColor="gray" leftIcon={<FontAwesome name='certificate' size={24} color='black' errorStyle={{ color: 'gray' }} />} onChangeText={(value) => handleChangeText('sold', value)} />
-            <Input style={styles.textIn} multiline numberOfLines={8} maxLength={500} value={food.description} autoCorrect={false} placeholder='Description' placeholderTextColor="gray" leftIcon={<FontAwesome name='buysellads' size={24} color='black' errorStyle={{ color: 'gray' }} />} onChangeText={(value) => handleChangeText('desctiption', value)} />
-            </View>
-            {/* footer */}
-            <View style={styles.footer}>
-            <View style={{flexDirection: 'row',  justifyContent: 'space-around',marginTop: 20, marginBottom: 35}}>
-           <View style={styles.vUpdate}> 
-               <Button color='white' title='Update food' onPress={()=> updateFood()}/>
-               </View>
-           <View style={styles.vDetele}>
-           <Button color='white' title='Delete food' onPress={()=> openConfirmationAlert()}/>
-           </View>
-        </View>  
-            </View>
-        </View>
+    <View style={styles.container}>
+            <ScrollView>
+
+                {/* Title */}
+                <View style={styles.header}>
+                    <Avatar rounded style={styles.sImage} source={{ uri: (food.linkImage) }} />
+                </View>
+                {/* body */}
+                <View style={styles.body}>
+                    <Card>
+                        <View style={{flexDirection: 'row'}}>
+                            <Text>Ngày tạo: {food.createdAt}</Text>
+                            <Text style={{marginLeft: 64}}>Đã bán: {food.sold}</Text>
+                        </View>
+                        <Text style={{textAlign: 'right'}}>Lượt xem: {food.view}</Text>
+                    </Card>
+                   <View style={{marginTop: 20}}>
+                   <Input label="Tên món ăn" placeholder='Tên món ăn' value={food.name} autoCorrect={false} leftIcon={{ type: 'material', name: 'forum', }} onChangeText={(value) => handleChangeText('name', value)} />
+                    <Input label="Hình ảnh món ăn" placeholder='Đường dẫn' value={food.linkImage} autoCorrect={false} leftIcon={{ type: 'material', name: 'polymer', }} onChangeText={(value) => handleChangeText('linkImage', value)} />
+                    <Input keyboardType='number-pad' label="Giá món ăn" placeholder='0' value={food.price} autoCorrect={false} leftIcon={{ type: 'material', name: 'euro', }} onChangeText={(value) => handleChangeText('price', value)} />
+                    <Input keyboardType='number-pad' label="Số lượng" placeholder='0' value={food.amount} autoCorrect={false} leftIcon={{ type: 'material', name: 'dock', }} onChangeText={(value) => handleChangeText('amount', value)} />
+                    <Input multiline numberOfLines={8} label="Mô tả" maxLength={500} value={food.description} autoCorrect={false} placeholder='Mô tả' leftIcon={{ type: 'material', name: 'description', }} onChangeText={(value) => handleChangeText('description', value)} />
+                   </View>
+                </View>
+                {/* footer */}
+                <View style={styles.footer}>
+                    
+                </View>
+ 
         </ScrollView>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around',  marginBottom: 10 }}>
+        <View style={styles.vUpdate}>
+            <Button color='white' title='Update food' onPress={() => updateFood()} />
+        </View>
+        <View style={styles.vDetele}>
+            <Button color='white' title='Delete food' onPress={() => openConfirmationAlert()} />
+        </View>
+    </View>
+    </View>
     )
 }
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        padding: 20
     },
     header: {
         flex: 3,
@@ -109,23 +125,24 @@ const styles = StyleSheet.create({
     },
     body: {
         flex: 5,
+        marginTop: 30
     },
     footer: {
-        flex: 1
+        flex: 0.2
     },
-    sImage:{
+    sImage: {
         resizeMode: 'stretch',
         width: 230,
         height: 140
     },
-    vUpdate:{
+    vUpdate: {
         backgroundColor: 'green',
         borderRadius: 20
-  },
-  vDetele: {
-    backgroundColor: 'red',
-    borderRadius: 20
-  }
+    },
+    vDetele: {
+        backgroundColor: 'red',
+        borderRadius: 20
+    }
 })
 export default ManageFoods;
 

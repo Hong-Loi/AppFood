@@ -53,7 +53,9 @@ const SettingUser = (props) => {
                 email: user.email,
                 phone: user.phone,
                 address: user.address,
-                password: user.password
+                password: user.password,
+                role: 0,
+                imageUser: user.imageUser
             })
             setUser(initialState);
          
@@ -76,7 +78,7 @@ const SettingUser = (props) => {
             <View style={styles.head}>
                 <Avatar
                     rounded
-                    source={require('../../images/user.jpg')}
+                    source={{uri: (user.imageUser)}}
                     style={styles.sAvatar}
                     size="large"
                 />
@@ -91,7 +93,12 @@ const SettingUser = (props) => {
 
             {/* body */}
             <View style={styles.body}>
-                <Card>
+
+                <View style={styles.inputGroup}>
+                        <Input placeholder="Get image online" color='black' fontSize={19}
+                            value={user.imageUser} leftIcon={<FontAwesome name='map' size={24} color='black' errorStyle={{ color: 'red' }} />}
+                            onChangeText={(value) => handleChangeText('imageUser', value)} />
+                    </View>
                     <View style={styles.inputGroup}>
                         <Input placeholder="Email user" color='black' fontSize={19}
                             value={user.email} leftIcon={<FontAwesome name='envelope' size={24} color='black' errorStyle={{ color: 'red' }} />}
@@ -107,12 +114,11 @@ const SettingUser = (props) => {
                             value={user.address} leftIcon={<FontAwesome name='map' size={24} color='black' errorStyle={{ color: 'red' }} />}
                             onChangeText={(value) => handleChangeText('address', value)} />
                     </View>
-                
-                </Card>
+                    <View style={{marginTop: 20}}><Text style={{textAlign: 'center', color: (color), fontSize: 16,fontWeight: 'bold'}}>{show}</Text>
+                    </View>
             </View>
             {/* Footer */}
-            <View style={{marginTop: 40}}><Text style={{textAlign: 'center', color: (color), fontSize: 16,fontWeight: 'bold'}}>{show}</Text>
-                    </View>
+            
             <View style={styles.footer}>
                 <View style={{ flex: 0.5, backgroundColor: '#ff5b77', justifyContent: 'center', }}>
                     <Button color='white' title='Cập nhật thông tin' onPress={() => openConfirmationAlert()} />
@@ -134,11 +140,12 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     body: {
-        flex: 5,
-        marginTop: 40
+        flex: 7,
+        marginTop: 20,
+        padding: 15
     },
     footer: {
-        flex: 2,
+        flex: 2.6,
         padding: 25,
         paddingTop: 120
     },

@@ -13,13 +13,14 @@ const HomeAdmin = (props) =>{
         firebase.db.collection('tusers').onSnapshot(querySnapshot => {
             const user = [];
             querySnapshot.docs.forEach(doc =>{
-                const {email, password, phone, address} = doc.data();
+                const {email, password, phone, address, imageUser} = doc.data();
                 user.push({
                     id: doc.id,
                     email,
                     password,
                     phone,
                     address,
+                    imageUser
                 })
             });
             setUser(user);
@@ -40,7 +41,7 @@ const HomeAdmin = (props) =>{
                              userId: item.id
                          })}>
                             
-                            <Avatar rounded style={styles.sAvatar} source={require('../../images/je.png')}/>
+                            <Avatar rounded style={styles.sAvatar} source={{uri: (item.imageUser)}}/>
                             <ListItem.Content>
                                 <ListItem.Title>{item.email}</ListItem.Title>
                                 <ListItem.Subtitle style={{paddingTop: 10}}>{item.address}</ListItem.Subtitle>
