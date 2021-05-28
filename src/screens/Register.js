@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from "react";
-import { ImageBackground, StyleSheet, Text, View, Image, Button, Keyboard } from "react-native";
-import { Input } from 'react-native-elements';
+import { ImageBackground, StyleSheet, Text, View, Image, Keyboard } from "react-native";
+import { Input,Button } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../database/firebase';
-
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
 const Register = ({ navigation, route }) => {
   //check user email valid
+  const [visible, setVisible] = React.useState(false);
+  const toggleAlert = React.useCallback(() => {
+    setVisible(!visible);
+  }, [visible]);
+
+  //set notification
+  const [nIcon, setnIcon] = useState();
+  const [title, setTitle] = useState();
+  const [color, setColor] = useState();
   const [user, setUser] = useState([])
- 
+  const _closeApp=()=>{
+    navigation.navigate('Login');
+    setVisible(!visible);
+  }
   useEffect(() => {
     let isMounted = true;
     firebase.db.collection('tusers').onSnapshot(querySnapshot => {
@@ -20,7 +32,6 @@ const Register = ({ navigation, route }) => {
         })
       });
       setUser(user);
-      console.log(user);
     })
     return () => { isMounted = false };
   }, [])
@@ -45,7 +56,6 @@ const Register = ({ navigation, route }) => {
       }
     })
     if(check>0){
-      console.log(check);
       return false;
     }
     else{
@@ -56,19 +66,34 @@ const Register = ({ navigation, route }) => {
   const saveNewUser = async () => {
     if (state.email === '' || state.address === '' || state.password === ''
       || state.rpassword === '' || state.phone === '') {
-      alert('Bạn không được để trống!');
+        setTitle('Bạn không được để trống!');
+        setnIcon('✖');
+        setColor('red');
+        toggleAlert();
     }
     else if (checkEmailMatch() == false) {
-          alert('Email đã tồn tại')
+      setTitle('Email đã tồn tại!');
+      setnIcon('✖');
+      setColor('red');
+      toggleAlert();
     }
     else if (state.password.length < 6 || state.rpassword.length < 6) {
-      alert('Mật khẩu phải lớn hơn 6 ký tự');
+      setTitle('Mật khẩu phải lớn hơn 6 ký tự!');
+      setnIcon('✖');
+      setColor('red');
+      toggleAlert();
     }
     else if (state.password != state.rpassword) {
-      alert('Xác nhận mật khẩu không trùng!');
+      setTitle('Xác nhận mật khẩu không giống nhau!');
+      setnIcon('✖');
+      setColor('red');
+      toggleAlert();
     }
     else if (state.address.length < 10) {
-      alert('Địa chỉ phải lớn hơn 10 ký tự');
+      setTitle('Địa chỉ phải lớn hơn 10!');
+      setnIcon('✖');
+      setColor('red');
+      toggleAlert();
     }
     else {
       try {
@@ -80,9 +105,15 @@ const Register = ({ navigation, route }) => {
           role: 0,
           imageUser: 'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png',
           userLike:'noData',
+          userCart:'noData',
         })
-        alert('Bạn đã đăng ký thành công^^');
-        navigation.navigate('Login');
+        
+        // navigation.navigate('Login');
+        setTitle('Bạn đã đăng ký tài khoản thành công!');
+        setnIcon('✔');
+        setColor('green');
+        toggleAlert();
+       
       } catch (error) {
         console.log(error);
       }
@@ -104,11 +135,30 @@ const Register = ({ navigation, route }) => {
         </View>
         {/* Handle Button */}
         <View style={styles.sButton}>
-          <Button color='white' title='Đăng ký' onPress={() => saveNewUser()} />
+          <Button color='white' backgroundColor='orange' title='Đăng ký' onPress={() => saveNewUser()} />
         </View>
         {/* Handle button register */}
 
       </ImageBackground>
+        {/* show dialog */}
+        <FancyAlert
+        visible={visible}
+        icon={<View style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: (color),
+          borderRadius: 80,
+          width: '100%',
+        }}><Text>{nIcon}</Text></View>}
+        style={{ backgroundColor: 'white' }}
+      >
+        <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
+      <View style={{paddingHorizontal: 30}}>
+      <Button style={{paddingHorizontal: 40}} title='Đóng' onPress={() => _closeApp()} />
+      </View>
+      </FancyAlert>
     </View>
   )
 };

@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, ScrollView, Image, Alert } from 'react-native';
 import firebase from '../../database/firebase';
 import { Input, Avatar, Button,Card } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-
+import Loading from '../Loading';
 
 const ManageFoods = (props) => {
     const initialState = {
@@ -18,14 +18,13 @@ const ManageFoods = (props) => {
     }
     const [food, setFood] = useState();
     const [loading, setLoading] = useState(true)
-    // console.log(props.route.params.userId);
+
 
     const getFoodById = async (id) => {
         const dbRef = firebase.db.collection('foods').doc(id);
         const doc = await dbRef.get();
         const food = doc.data();
 
-        //   console.log(user);
         setFood({
             ...food,
             id: doc.id
@@ -67,14 +66,12 @@ const ManageFoods = (props) => {
 
     if (loading) {
         return (
-            <View>
-                <ActivityIndicator size='large' color='Blue' />
-            </View>
+           <Loading/>
         )
     }
     return (
     <View style={styles.container}>
-            <ScrollView>
+            <ScrollView showsVerticalScrollIndicator={false}>
 
                 {/* Title */}
                 <View style={styles.header}>

@@ -5,37 +5,55 @@ import {
     View,
     StyleSheet,
     Text,
-    Button,
     TextInput,
     Image,
     FlatList,
     Dimensions,
+    
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const { width, height } = Dimensions.get('window');
 import firebase from '../../database/firebase';
-import {getUserId} from '../Login';
-
-
+import { getUserId } from '../Login';
+import Loading from '../Loading';
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
+import {  Button,Divider } from 'react-native-elements';
 const List = (props) => {
+      //dialog
+  const [visible, setVisible] = React.useState(false);
+  const toggleAlert = React.useCallback(() => {
+    setVisible(!visible);
+  }, [visible]);
+  const _closeApp=()=>{
+    setVisible(!visible);
+  }
+  //set notification
+  const [nIcon, setnIcon] = useState();
+  const [title, setTitle] = useState();
+  const [color, setColor] = useState();
     var userId = getUserId();
+
+    // var userCart = getUserCart();
+    // alert(getUserCar());
     //Get value of firebase
+    const [loading, setLoading] = useState(true);
     const [food, setFood] = useState([]);
-    const [color, setColor] = useState();
     const [user, setUser] = useState();
+    const [data, setData] = useState();
     const getUserById = async (id) => {
         const dbRef = firebase.db.collection('tusers').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 
-          console.log(user);
         setUser({
             ...user,
             id: doc.id
         })
+        setLoading(false);
     }
     useEffect(() => {
+        let isMounted = true;
         firebase.db.collection('foods').onSnapshot(querySnapshot => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
@@ -53,24 +71,54 @@ const List = (props) => {
             getUserById(userId);
             setDataSouce(food);
         })
+        return () => { isMounted = false };
     }, [])
+    // update cart of user
+    const updateCartForUser = async (idFood) => {
+        const dbRef = firebase.db.collection('tusers').doc(userId);
+        var strCart = idFood;
+        //if user is not like this food
+        var getItemIdFoodInSort = user.userCart.split("-");
+        let showArr = getItemIdFoodInSort.filter((item) => {
+            return item != 'noData';
+        })
+        //Check food vaild in list 
+        let check = false;
+        for (let i = 0; i < showArr.length; i++) {
+            if (showArr[i] == strCart) {
+                check = true;
+            }
+        }
+        if (check == true) {
+            setTitle('Bạn đã thêm món ăn này vào giỏ hàng rồi');
+            setnIcon('✔');
+            setColor('green');
+            toggleAlert();
+        }
+        else {
+            setTitle('Thêm thành công vào giỏ hàng');
+            setnIcon('✔');
+            setColor('green');
+            toggleAlert();
+            setData(user.userCart);
+            await dbRef.set({
+                password: user.password,
+                email: user.email,
+                phone: user.phone,
+                address: user.address,
+                role: 0,
+                imageUser: user.imageUser,
+                userLike: user.userLike,
+                userCart: data + '-' + strCart
+            })
+
+        }
+
+    }
     //Handle seacrch
     const [query, setQuery] = useState();
     const [dataSouce, setDataSouce] = useState([]);
-    const nonAccentVietnamese = (str) => {
-        str = str.toLowerCase();
-        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
-        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
-        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
-        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
-        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
-        str = str.replace(/đ/g, "d");
-        // Some system encode vietnamese combining accent as individual utf-8 characters
-        str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // Huyền sắc hỏi ngã nặng 
-        str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // Â, Ê, Ă, Ơ, Ư
-        return str;
-    }
+
     const _search = () => {
         if (query == '') {
             setDataSouce(food);
@@ -86,9 +134,12 @@ const List = (props) => {
             <View style={{ height: 10, width: '100%', backgroundColor: '#e5e5e5' }} />
         );
     };
+    if (loading) {
+        <Loading />
+    }
     //handle food user like
- 
-  
+
+
 
     return (
         <View style={styles.container}>
@@ -121,10 +172,10 @@ const List = (props) => {
                                     <Text numberOfLines={4} style={styles.description}>
                                         Đã bán:  {item.sold}
                                     </Text>
-                                    <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <Text style={styles.author}>đ{item.price}</Text>
-                                        <TouchableOpacity  style={{ marginRight: 30 }}>
-                                            <FontAwesome name='cart-plus' size={32} color={color} />
+                                        <TouchableOpacity onPress={() => updateCartForUser(item.id)} style={{ marginRight: 30 }} >
+                                            <FontAwesome name='cart-plus' size={32} color='black' />
                                         </TouchableOpacity>
                                     </View>
 
@@ -134,6 +185,26 @@ const List = (props) => {
                     );
                 }}
             />
+            {/* show dialog */}
+            <FancyAlert
+                visible={visible}
+                icon={<View style={{
+                    flex: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: (color),
+                    borderRadius: 80,
+                    width: '100%',
+                }}>
+                    <Divider/><Text>{nIcon}</Text></View>}
+                style={{ backgroundColor: 'white' }}
+            >
+                <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
+                <View style={{ paddingHorizontal: 30 }}>
+                    <Button style={{ paddingHorizontal: 40 }} title='Đóng' onPress={() => _closeApp()} />
+                </View>
+            </FancyAlert>
         </View>
     );
 

@@ -9,7 +9,7 @@ import {
   Image,
   FlatList,
   Dimensions,
-  NativeModules
+  RefreshControl
 } from 'react-native';
 import RNRestart from 'react-native-restart';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -18,12 +18,31 @@ const { width, height } = Dimensions.get('window');
 import firebase from '../../database/firebase';
 import { getUserId } from '../Login';
 import { getUserLike } from '../Login';
-
-
+import {getNewLike} from '../users/DetailProduct';
+const wait = (timeout) => {
+  return new Promise(resolve => setTimeout(resolve, timeout));
+}
 const Love = (props) => {
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    _search();
+    setRefreshing(true);
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
 
   var userId = getUserId();
-  var getLikeFormUser = getUserLike();
+  var getLikeWhenLogin = getUserLike();
+  var getLikeNewFormUser = getNewLike();
+  var getLikeFormUser='';
+  if(getLikeNewFormUser!=null){
+    getLikeFormUser = getLikeNewFormUser;
+  }
+  else{
+    getLikeFormUser=getLikeWhenLogin;
+  }
+  
+  
   //Get value of firebase
   const [food, setFood] = useState([]);
   const [foodLike, setFoodLike] = useState([]);
@@ -39,6 +58,7 @@ const Love = (props) => {
     })
   }
   useEffect(() => {
+    let isMounted=true;
     firebase.db.collection('foods').onSnapshot(querySnapshot => {
       const food = [];
       querySnapshot.docs.forEach(doc => {
@@ -54,7 +74,7 @@ const Love = (props) => {
       });
       setFood(food);
       getUserById(userId);
-   
+      
       var getItemIdLike = getLikeFormUser.split("-");
       //delete arr[0]
       let showArr = getItemIdLike.filter((item) => {
@@ -71,11 +91,13 @@ const Love = (props) => {
       setFoodLike(foodLike);
       setDataSouce(foodLike);
     })
+    return () => { isMounted = false };
   }, [])
   //Handle seacrch
   const [query, setQuery] = useState();
   const [dataSouce, setDataSouce] = useState([]);
   const _search = () => {
+    alert(getLikeFormUser);
     if (query == '') {
       setDataSouce(foodLike);
   } else {
@@ -106,11 +128,17 @@ const Love = (props) => {
           onChange={() => _search()}
           style={styles.input}
         />
-        <TouchableOpacity onPress={()=>_search()}>
+        <TouchableOpacity onPress={() => _search()}>
           <FontAwesome style={{ paddingHorizontal: 10 }} name='shopping-cart' size={28} color='black' />
         </TouchableOpacity>
       </View>
-      <FlatList  
+      <FlatList   
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      }
         data={dataSouce}
         ItemSeparatorComponent={() => separator()}
         renderItem={({ item, index }) => {

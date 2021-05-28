@@ -1,13 +1,28 @@
 import React, { useState } from "react";
 import { useEffect } from 'react';
-import { ImageBackground, StyleSheet, Text, View, Image, Button, TouchableOpacity } from "react-native";
-import { Input } from 'react-native-elements';
+import { ImageBackground, StyleSheet, Text, View, Image,  TouchableOpacity } from "react-native";
+import { Input, Button } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../database/firebase';
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
 let getId = '';
 let getLike='';
+let getCart='';
+
 const Login = (props) => {
+  //dialog
+  const [visible, setVisible] = React.useState(false);
+  const toggleAlert = React.useCallback(() => {
+    setVisible(!visible);
+  }, [visible]);
+  const _closeApp=()=>{
+    setVisible(!visible);
+  }
+  //set notification
+  const [nIcon, setnIcon] = useState();
+  const [title, setTitle] = useState();
+  const [color, setColor] = useState();
   //user
   const [user, setUser] = useState([])
   useEffect(() => {
@@ -15,14 +30,14 @@ const Login = (props) => {
     firebase.db.collection('tusers').onSnapshot(querySnapshot => {
       const user = [];
       querySnapshot.docs.forEach(doc => {
-        console.log(doc.data())
-        const { email, password, role, userLike } = doc.data();
+        const { email, password, role, userLike,userCart } = doc.data();
         user.push({
           id: doc.id,
           email,
           password,
           role,
-          userLike
+          userLike,
+          userCart
         })
 
       });
@@ -33,11 +48,10 @@ const Login = (props) => {
   //Check login
   const checkLogin = async () => {
     if (state.email === '' || state.password === '') {
-      alert('Bạn không được để trống!');
-    }
-    else if (state.email == 'admin' && state.password == 'admin') {
-      alert('Bạn đã đăng nhập vào trang quản trị');
-      props.navigation.navigate('HomeAdmin');
+      setTitle('Bạn không được để trống!');
+      setnIcon('✖');
+      setColor('red');
+      toggleAlert();
     }
     else {
       var x = -1;
@@ -45,6 +59,8 @@ const Login = (props) => {
         if (state.email == item.email && state.password == item.password) {
           getId=item.id;
           getLike=item.userLike;
+          getCart=item.userCart;
+
           //IF role = 0  then to admin
           if(item.role===1){
             props.navigation.navigate('HomeAdmin',{
@@ -68,10 +84,16 @@ const Login = (props) => {
       })
       // Alert for success
       if (x == 0) {
-        alert('Bạn đã đăng nhập với tư cách quản trị viên');
+        setTitle('Bạn đã đăng nhập với tư cách quản trị viên');
+        setnIcon('✔');
+        setColor('green');
+        toggleAlert();
       }
       else if(x==-1){
-        alert('Tài khoản hoặc mật khẩu của bạn không chính xác');
+        setTitle('Tài khoản hoặc mật khẩu của bạn không chính xác!');
+        setnIcon('✖');
+        setColor('red');
+        toggleAlert();
       }
 
     }
@@ -108,6 +130,25 @@ const Login = (props) => {
           <TouchableOpacity onPress={() => _onChagePageRegister()}><Text style={styles.sT2}>Nhấn vào đây</Text></TouchableOpacity>
         </View>
       </ImageBackground>
+      {/* show dialog */}
+      <FancyAlert
+        visible={visible}
+        icon={<View style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: (color),
+          borderRadius: 80,
+          width: '100%',
+        }}><Text>{nIcon}</Text></View>}
+        style={{ backgroundColor: 'white' }}
+      >
+        <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
+      <View style={{paddingHorizontal: 30}}>
+      <Button style={{paddingHorizontal: 40}} title='Đóng' onPress={() => _closeApp()} />
+      </View>
+      </FancyAlert>
     </View>
   )
 };
@@ -117,6 +158,9 @@ export const getUserId = () =>{
 export const getUserLike = ()=>{
  return getLike;
 }
+export const getUserCart = ()=>{
+  return getCart;
+ }
 const styles = StyleSheet.create({
   sT1: {
     color: 'white',
@@ -134,7 +178,7 @@ const styles = StyleSheet.create({
   },
   sButton: {
     backgroundColor: 'red',
-    marginTop: 50,
+    marginTop: 30,
     fontSize: 20,
 
   },

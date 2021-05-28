@@ -15,14 +15,12 @@ const ManageDetailUsers = (props) => {
     }
     const [user, setUser] = useState();
     const [loading, setLoading] = useState(true)
-    // console.log(props.route.params.userId);
 
     const getUserById = async (id) => {
         const dbRef = firebase.db.collection('tusers').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 
-        //   console.log(user);
         setUser({
             ...user,
             id: doc.id
@@ -30,8 +28,12 @@ const ManageDetailUsers = (props) => {
         setLoading(false);
     }
     useEffect(() => {
+        let isMounted = true;  
         getUserById(props.route.params.userId);
-    }, [])
+        return () => { isMounted = false };
+    },
+    
+    [])
     const handleChangeText = (name, value) => {
         setUser({ ...user, [name]: value })
     }

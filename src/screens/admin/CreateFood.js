@@ -1,6 +1,6 @@
 import { size } from "lodash";
 import React, { useState } from "react";
-import { ImageBackground, StyleSheet, TextInput, View, Image, Button, TouchableOpacity } from "react-native";
+import { ImageBackground, StyleSheet, TextInput, View, Image, Button,  Keyboard } from "react-native";
 import { Input, Avatar } from 'react-native-elements';
 import { ScrollView } from "react-native-gesture-handler";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -44,13 +44,13 @@ const CreateFood = ({ navigation }) => {
   }
   return (
     <View  style={styles.container}>
-      <ScrollView>
+      <ScrollView style={{marginBottom: 140}}>
           <View style={styles.body2}>
           <Input label="Tên món ăn" placeholder='Tên món ăn'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'forum', }} onChangeText={(value) => handleChangeText('name', value)} />
           <Input label="Hình ảnh món ăn" placeholder='Đường dẫn'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'polymer', }} onChangeText={(value) => handleChangeText('linkImage', value)} />
           <Input keyboardType='number-pad' label="Giá món ăn" placeholder='0'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'euro', }} onChangeText={(value) => handleChangeText('price', value)} />
           <Input keyboardType='number-pad' label="Số lượng" placeholder='0'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'dock', }} onChangeText={(value) => handleChangeText('amount', value)} />
-           <Input  multiline numberOfLines={8} label="Mô tả" maxLength={500} autoCorrect={false} placeholder='Mô tả' leftIcon={{ type: 'material', name: 'description', }} onChangeText={(value) => handleChangeText('description', value)} />
+           <Input  multiline numberOfLines={8}  label="Mô tả" maxLength={500} autoCorrect={false} placeholder='Mô tả' leftIcon={{ type: 'material', name: 'description', }} onChangeText={(value) => handleChangeText('description', value)} />
           </View>
           {/* Handle Button */}
           

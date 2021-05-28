@@ -9,10 +9,10 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const { width, height } = Dimensions.get('window');
 const Home = (props) => {
     var i = 0;
-    const [food, setFood] = useState([])
-    const [foodOne, setFoodOne] = useState([])
-    const [foodTwo, setFoodTwo] = useState([])
-    const [foodThree, setFoodThree] = useState([])
+    const [food, setFood] = useState([]);
+    const [dateFood, setDateFood] = useState([]);
+    const [viewFood, setViewFood] = useState([]);
+    const [soldFood, setSoldFood] = useState([]);
     const [fQuery, setfQuery] = useState()
     const _searchItem = () => {
         props.navigation.navigate('List');
@@ -23,7 +23,7 @@ const Home = (props) => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
 
-                const { name, linkImage, price, sold, description } = doc.data();
+                const { name, linkImage, price, sold, description, view, amount, createdAt } = doc.data();
                 food.push({
                     id: doc.id,
                     name,
@@ -31,40 +31,46 @@ const Home = (props) => {
                     price,
                     sold,
                     description,
+                    view,
+                    amount,
+                    createdAt
                 })
             });
+            let getSoldFood = food.sort(function (x, y) {
+                return y.sold - x.sold;
+            })
             //get data form firebase
             setFood(food);
-            //sort by sold <<
-            const f = food.sort(function(x,y){
-                    return y.sold - x.sold;
-             })
-             
-             //sort by sold >>
-             //get value random
-             const fOne = food.filter((item)=>{
-                return food.length=8;
-             })
-            setFoodOne(fOne);
-             //get top 10 sold
-             const getTop10 = f.filter((item)=>{
-                 return f.length=10;
-             })
-             setFoodTwo(getTop10);
-             //get top 10 sold after
-             const getTop10_20 = f.filter((item)=>{
-                return item.length=10&&item.sold<50;
+            //sort by date
+            let dateFood = food.filter(item=>{
+                return item.view>10;
             })
-              setFoodThree(getTop10_20);
+            setDateFood(dateFood);
+            //Sort by sold
+            var arrSold=[];
+            var arrView=[];
+            var count=0;
+            for(let i=0;i<getSoldFood.length;i++){
+                count++;
+                if(count%2==0&&count<21){
+                   arrSold.push(getSoldFood[i]);
+                }
+                else if (count%2!=0&&count<21){
+                    arrView.push(getSoldFood[i]);
+                }
+            }
+            setSoldFood(arrSold);
+            //Handle view
+            setViewFood(arrView);
         })
     }, [])
 
 
     return (
         <View style={styles.container}>
-              <TouchableOpacity onPress={() => _searchItem()}>
-            <View style={styles.header}>
-              
+            <TouchableOpacity onPress={() => _searchItem()}>
+                <View style={styles.header}>
+
                     <TextInput
                         placeholder="Bạn muốn tìm gì..."
                         placeholderTextColor="gray"
@@ -73,8 +79,8 @@ const Home = (props) => {
                     />
 
                     <FontAwesome style={{ paddingHorizontal: 10 }} name='search' size={24} color='black' />
-               
-            </View>
+
+                </View>
             </TouchableOpacity>
             {/* body here */}
 
@@ -96,7 +102,7 @@ const Home = (props) => {
                             <FlatList showsHorizontalScrollIndicator={false}
                                 horizontal={true}
                                 // keyExtractor={food => food.id}
-                                data={foodOne}
+                                data={dateFood}
                                 renderItem={({ item }) => {
                                     return (
                                         <View>
@@ -124,7 +130,7 @@ const Home = (props) => {
                         <SafeAreaView  >
                             <FlatList
                                 // keyExtractor={food => food.id}
-                                data={foodTwo}
+                                data={viewFood}
                                 renderItem={({ item }) => {
 
                                     return (
@@ -152,7 +158,7 @@ const Home = (props) => {
                         <SafeAreaView >
                             <FlatList
                                 // keyExtractor={food => food.id}
-                                data={foodThree}
+                                data={soldFood}
                                 renderItem={({ item }) => {
 
                                     return (

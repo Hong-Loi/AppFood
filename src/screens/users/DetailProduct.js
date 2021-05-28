@@ -10,21 +10,37 @@ import { Button } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native';
 import { Tab } from 'react-native-elements';
 import {getUserId} from '../Login';
+import Loading from '../Loading';
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
+let getLike='';
 const DetailProduct = (props) => {
-    var i = 0;
+    //dialog
+  const [visible, setVisible] = React.useState(false);
+  const toggleAlert = React.useCallback(() => {
+    setVisible(!visible);
+  }, [visible]);
+  const _closeApp=()=>{
+    setVisible(!visible);
+  }
+  //set notification
+  const [nIcon, setnIcon] = useState();
+  const [title, setTitle] = useState();
+  const [colorA, setColorA] = useState();
     var userId = getUserId();
-    const [foodOne, setFoodOne] = useState([])
-    const [foodTwo, setFoodTwo] = useState([])
+    var count =0;
+    const [dataFood, seteDataFood] = useState([])
     const [color, setColor] = useState()
+    const [dataViewOne, setDataViewOne] = useState()
+    const [dataViewTwo, setDataViewTwo] = useState()
     useEffect(() => {
+        let isMounted=true;
         firebase.db.collection('foods').onSnapshot(querySnapshot => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
 
                 const { name, linkImage, price, sold, description } = doc.data();
-                if (i >= 0 && i <= 5) {
-                    foodOne.push({
+                    dataFood.push({
                         id: doc.id,
                         name,
                         linkImage,
@@ -32,32 +48,30 @@ const DetailProduct = (props) => {
                         sold,
                         description,
                     })
-                }
-                if (i >= 5 && i <= 10) {
-                    foodTwo.push({
-                        id: doc.id,
-                        name,
-                        linkImage,
-                        price,
-                        sold,
-                        description,
-                    })
-                }
-                i++;
             });
-            setFoodOne(foodOne);
-            setFoodTwo(foodTwo);
+            seteDataFood(dataFood);
+           let getTopViewFood = dataFood.sort(function (x, y) {
+               return y.View - x.View;
+           })
+           //handle dataview one for list view
+          
+           const dataViewOne=[];
+           const dataViewTwo=[];
+           for(let i=0;i<getTopViewFood.length;i++){
+               count++;
+               if(count%2==0&&count<=10){
+                   dataViewOne.push(getTopViewFood[i]);
+               }
+               else if(count%2!=0&&count<=10){
+                   dataViewTwo.push(getTopViewFood[i]);
+               }
+           }
+           setDataViewOne(dataViewOne);
+           setDataViewTwo(dataViewTwo);
         })
-    }, [])
-    const initialState = {
-        id: '',
-        name: '',
-        linkImage: '',
-        price: '',
-        sold: '',
-        description: '',
-
-    }
+        return () => { isMounted = false };
+    },
+     [])
     const [food, setFood] = useState();
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState();
@@ -67,7 +81,6 @@ const DetailProduct = (props) => {
         const doc = await dbRef.get();
         const user = doc.data();
 
-          console.log(user);
         setUser({
             ...user,
             id: doc.id
@@ -80,7 +93,6 @@ const DetailProduct = (props) => {
         const doc = await dbRef.get();
         const food = doc.data();
 
-        //   console.log(food);
         setFood({
             ...food,
             id: doc.id
@@ -88,8 +100,10 @@ const DetailProduct = (props) => {
         setLoading(false);
     }
     useEffect(() => {
+        let isMounte=true;
         getFoodById(props.route.params.foodId);
         getUserById(userId);
+        return () => { isMounte = false };
     }, [])
     //when user want add it in list like
     const _deleteFoodUserLike = async () =>{
@@ -102,7 +116,6 @@ const DetailProduct = (props) => {
             return item!=strLike;
         })
         var newStr = deleteThisFood.join('-');
-        console.log(newStr);
         await dbRef.set({
             password: user.password,
             email: user.email,
@@ -110,8 +123,10 @@ const DetailProduct = (props) => {
             address: user.address,
             role: 0,
             imageUser: user.imageUser,
-            userLike: newStr
+            userLike: newStr,
+            userCart: user.userCart
         })
+       getLike=user.userLike;
 
     }
     const updateLike = async () => {
@@ -137,6 +152,7 @@ const DetailProduct = (props) => {
             ])
         }
         else{
+            let isMoun=true;
             setColor('red');
              await dbRef.set({
                 password: user.password,
@@ -145,19 +161,64 @@ const DetailProduct = (props) => {
                 address: user.address,
                 role: 0,
                 imageUser: user.imageUser,
-                userLike: user.userLike + '-' + strLike
+                userLike: user.userLike + '-' + strLike,
+                userCart: user.userCart
             })
+            setTitle('Thêm vào danh sách yêu thích thành công');
+            setnIcon('💖');
+            setColorA('green');
+            toggleAlert();
+            getLike=user.userLike;
+            return()=>{ isMoun=false};
         }
-        
-     
+ 
+    }
+     // update cart of user
+     const updateCartForUser = async () => {
+        const dbRef = firebase.db.collection('tusers').doc(userId);
+        var strCart = food.id;
+        //if user is not like this food
+        var getItemIdFoodInSort = user.userCart.split("-");
+        let showArr = getItemIdFoodInSort.filter((item) => {
+            return item != 'noData';
+        })
+        //Check food vaild in list 
+        let check = false;
+        for (let i = 0; i < showArr.length; i++) {
+            if (showArr[i] == strCart) {
+                check = true;
+            }
+        }
+        if (check == true) {
+            setTitle('Bạn đã thêm món ăn này vào giỏ hàng rồi');
+            setnIcon('✔');
+            setColorA('green');
+            toggleAlert();
+        }
+        else {
+            let isM =true;
+            setTitle('Thêm thành công vào giỏ hàng');
+            setnIcon('✔');
+            setColorA('green');
+            toggleAlert();
+            await dbRef.set({
+                password: user.password,
+                email: user.email,
+                phone: user.phone,
+                address: user.address,
+                role: 0,
+                imageUser: user.imageUser,
+                userLike: user.userLike,
+                userCart: user.userCart + '-' + strCart
+            })
            
-        
+          return()=>{ isM=false};
+        }
+
     }
     if (loading) {
         return (
-            <View>
-                <ActivityIndicator size='large' color='Blue' />
-            </View>
+           <Loading/>
         )
     }
     return (
@@ -202,7 +263,7 @@ const DetailProduct = (props) => {
                                 <SafeAreaView >
                                     <FlatList
                                         keyExtractor={food => food.description}
-                                        data={foodOne}
+                                        data={dataViewOne}
                                         renderItem={({ item }) => {
 
                                             return (
@@ -228,7 +289,7 @@ const DetailProduct = (props) => {
                                 <SafeAreaView >
                                     <FlatList
                                         keyExtractor={food => food.description}
-                                        data={foodTwo}
+                                        data={dataViewTwo}
                                         renderItem={({ item }) => {
 
                                             return (
@@ -265,16 +326,38 @@ const DetailProduct = (props) => {
                     <TouchableOpacity style={{ flex: 1, backgroundColor: '#259d55', borderRightWidth: 1, borderLeftWidth: 1 }}>
                         <Button onPress={()=>_deleteFoodUserLike()}  type="clear" icon={<FontAwesome name='comment' size={31} color='white' />} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ flex: 1.5, backgroundColor: 'red', color: 'red', alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={()=>updateCartForUser()} style={{ flex: 1.5, backgroundColor: 'red', color: 'red', alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontSize: 22, color: 'white', }}>Mua ngay</Text>
                     </TouchableOpacity>
 
                 </View>
             </Tab>
+              {/* show dialog */}
+      <FancyAlert
+        visible={visible}
+        icon={<View style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: (colorA),
+          borderRadius: 80,
+          width: '100%',
+        }}><Text>{nIcon}</Text></View>}
+        style={{ backgroundColor: 'white' }}
+      >
+        <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
+      <View style={{paddingHorizontal: 30}}>
+      <Button style={{paddingHorizontal: 40}} title='Đóng' onPress={() => _closeApp()} />
+      </View>
+      </FancyAlert>
         </View>
 
     )
 }
+export const getNewLike = ()=>{
+    return getLike;
+   }
 const styles = StyleSheet.create({
     container: {
         flex: 1,

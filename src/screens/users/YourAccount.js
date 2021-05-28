@@ -6,6 +6,7 @@ import { Avatar, Card, Divider } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../../database/firebase';
 import {getUserId} from '../Login';
+import Loading from '../Loading';
 
 const YourAccount = (props) => {
     
@@ -29,9 +30,7 @@ const YourAccount = (props) => {
     }, [])
     if(loading){
         return(
-            <View>
-                <ActivityIndicator size='large' color='Blue'/>
-            </View>
+           <Loading/>
         )
     }
     return (
