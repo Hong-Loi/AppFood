@@ -2,14 +2,16 @@ import * as React from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, FlatList, SafeAreaView, ScrollView, LogBox, Dimensions } from 'react-native';
-import { Divider, Card } from 'react-native-elements';
+import { Divider, Card, ListItem, Avatar } from 'react-native-elements';
 import firebase from '../../database/firebase';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Swiper from 'react-native-swiper';
 
 const { width, height } = Dimensions.get('window');
 const Home = (props) => {
     var i = 0;
     const [food, setFood] = useState([]);
+    const [dataHead, setDataHead] = useState([]);
     const [dateFood, setDateFood] = useState([]);
     const [viewFood, setViewFood] = useState([]);
     const [soldFood, setSoldFood] = useState([]);
@@ -42,23 +44,28 @@ const Home = (props) => {
             //get data form firebase
             setFood(food);
             //sort by date
-            let dateFood = food.filter(item=>{
-                return item.view>10;
+            let dateFood = food.filter(item => {
+                return item.view > 10;
             })
             setDateFood(dateFood);
             //Sort by sold
-            var arrSold=[];
-            var arrView=[];
-            var count=0;
-            for(let i=0;i<getSoldFood.length;i++){
+            var arrHead = [];
+            var arrSold = [];
+            var arrView = [];
+            var count = 0;
+            for (let i = 0; i < getSoldFood.length; i++) {
                 count++;
-                if(count%2==0&&count<21){
-                   arrSold.push(getSoldFood[i]);
+                if (count < 7) {
+                    arrHead.push(getSoldFood[i]);
                 }
-                else if (count%2!=0&&count<21){
+                if (count % 2 == 0 && count < 21 && count >= 7) {
+                    arrSold.push(getSoldFood[i]);
+                }
+                else if (count % 2 != 0 && count < 21 && count >= 7) {
                     arrView.push(getSoldFood[i]);
                 }
             }
+            setDataHead(arrHead);
             setSoldFood(arrSold);
             //Handle view
             setViewFood(arrView);
@@ -85,20 +92,27 @@ const Home = (props) => {
             {/* body here */}
 
             <ScrollView>
-                <TouchableOpacity>
-                    <Image
-                        style={styles.tinyLogo}
-                        source={{
-                            uri: 'https://png.pngtree.com/thumb_back/fw800/back_our/20190622/ourmid/pngtree-food-festival-cute-food-girl-cartoon-food-banner-image_210127.jpg',
-                        }}
-                    />
-                </TouchableOpacity>
+                <View style={{ height: 170 }}>
+                    <Swiper showsButtons={true} 
+                    autoplay={true}
+                    showsPagination={false}
+                    >
+                        {
+                            dataHead.map(item => {
+                                return (
+                                    <ListItem key={item.id} bottomDivider
+                                    onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
+                                        <Avatar style={{ width: '100%', height: 190}} rounded  source={{ uri: (item.linkImage) }} />  
+                                    </ListItem>
+                                )
+                            })
+                        }
+                    </Swiper>
+                </View>
                 <Text style={styles.fText}>Gợi ý hôm nay</Text>
-                <Card>
-                    <View>
 
 
-                        <SafeAreaView style={{ flex: 1 }}>
+                        <SafeAreaView >
                             <FlatList showsHorizontalScrollIndicator={false}
                                 horizontal={true}
                                 // keyExtractor={food => food.id}
@@ -107,8 +121,9 @@ const Home = (props) => {
                                     return (
                                         <View>
                                             <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
-                                                <Image source={{ uri: (item.linkImage) }} style={{ width: 100, height: 100, marginLeft: 20, resizeMode: 'stretch' }} />
-                                                <Text style={{ textAlign: 'center' }}>đ{item.price}</Text>
+                                                <Avatar rounded source={{ uri: (item.linkImage) }} style={{ width: 130, height: 140, marginLeft: 20, resizeMode: 'stretch' }} />
+                                                <Text style={{ textAlign: 'center',  fontSize: 18, fontWeight: 'bold', marginRight: 30, marginTop: 6 }}>{item.name}</Text>
+                                                <Text style={{ textAlign: 'center', marginLeft: 10,marginRight: 60, color: 'red'}}>đ{item.price}</Text>
                                             </TouchableOpacity>
                                         </View>
                                     )
@@ -117,10 +132,6 @@ const Home = (props) => {
                             />
                         </SafeAreaView>
 
-
-
-                    </View>
-                </Card>
                 <Text style={styles.fText}>Các món ăn nổi bật</Text>
                 {/* Product hot */}
 
@@ -137,7 +148,7 @@ const Home = (props) => {
 
                                         <View style={styles.item}>
                                             <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
-                                                <Image source={{ uri: (item.linkImage) }} style={{ width: 165, height: 180, marginLeft: 0, resizeMode: 'stretch' }} />
+                                                <Avatar rounded source={{ uri: (item.linkImage) }} style={{ width: 165, height: 180, marginLeft: 0, resizeMode: 'stretch' }} />
                                                 <Divider style={{ backgroundColor: 'white' }} />
                                                 <Text style={{ textAlign: 'center', fontSize: 17 }}>{item.name}</Text>
                                                 <View style={{ flexDirection: 'row', marginTop: 10 }}>
@@ -164,7 +175,7 @@ const Home = (props) => {
                                     return (
                                         <View style={styles.item}>
                                             <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
-                                                <Image source={{ uri: (item.linkImage) }} style={{ width: 165, height: 180, marginLeft: 0, resizeMode: 'stretch' }} />
+                                                <Avatar rounded source={{ uri: (item.linkImage) }} style={{ width: 165, height: 180, marginLeft: 0, resizeMode: 'stretch' }} />
                                                 <Divider style={{ backgroundColor: 'white' }} />
                                                 <Text style={{ textAlign: 'center', fontSize: 17 }}>{item.name}</Text>
                                                 <View style={{ flexDirection: 'row', marginTop: 10 }}>
@@ -191,6 +202,7 @@ const Home = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#FFFFCC'
     },
     tinyLogo: {
         width: 377,
@@ -200,14 +212,15 @@ const styles = StyleSheet.create({
         color: '#EE0000',
         fontWeight: 'bold',
         fontSize: 17,
-        marginTop: 16,
-        marginBottom: 5,
+        marginTop: 40,
+        marginBottom: 15,
         marginLeft: 8
 
     },
     item: {
-        borderWidth: 1,
-        margin: 10
+        borderRadius: 20,
+        margin: 10,
+        backgroundColor: '#FFFF66'
     },
     input: {
         height: 45,
@@ -226,5 +239,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row'
     },
+    wrapper: {
+        width: 40,
+        height: 40
+    },
+   
 });
 export default Home;

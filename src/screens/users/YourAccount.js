@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import * as React from 'react';
-import { ActivityIndicator } from 'react-native';
 import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { Avatar, Card, Divider } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -15,7 +14,7 @@ const YourAccount = (props) => {
     const [loading, setLoading] = useState(true)
 
     const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('tusers').doc(id);
+        const dbRef = firebase.db.collection('users').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 

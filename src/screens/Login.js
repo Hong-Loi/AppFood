@@ -27,7 +27,7 @@ const Login = (props) => {
   const [user, setUser] = useState([])
   useEffect(() => {
     let isMounted = true;
-    firebase.db.collection('tusers').onSnapshot(querySnapshot => {
+    firebase.db.collection('users').onSnapshot(querySnapshot => {
       const user = [];
       querySnapshot.docs.forEach(doc => {
         const { email, password, role, userLike,userCart } = doc.data();

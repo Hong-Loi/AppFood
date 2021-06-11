@@ -77,7 +77,7 @@ const DetailProduct2 = (props) => {
     const [user, setUser] = useState();
     //get user id
     const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('tusers').doc(id);
+        const dbRef = firebase.db.collection('users').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 
@@ -108,7 +108,7 @@ const DetailProduct2 = (props) => {
     //when user want add it in list like
     const _deleteFoodUserLike = async () =>{
         setColor('black');
-        const dbRef = firebase.db.collection('tusers').doc(userId);
+        const dbRef = firebase.db.collection('users').doc(userId);
         var strLike = food.id;
         //if user is not like this food
         var getItemIdLike = user.userLike.split("-");
@@ -129,7 +129,7 @@ const DetailProduct2 = (props) => {
 
     }
     const updateLike = async () => {
-        const dbRef = firebase.db.collection('tusers').doc(userId);
+        const dbRef = firebase.db.collection('users').doc(userId);
         var strLike = food.id;
         //if user is not like this food
         var getItemIdLike = user.userLike.split("-");
@@ -173,7 +173,7 @@ const DetailProduct2 = (props) => {
     }
      // update cart of user
      const updateCartForUser = async () => {
-        const dbRef = firebase.db.collection('tusers').doc(userId);
+        const dbRef = firebase.db.collection('users').doc(userId);
         var strCart = food.id;
         //if user is not like this food
         var getItemIdFoodInSort = user.userCart.split("-");

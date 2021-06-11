@@ -34,10 +34,10 @@ const Tab = createBottomTabNavigator();
 function MyStackOfUser(){
   return (
     <Tab.Navigator tabBarOptions={{labelStyle:{ fontSize: 14}, activeTintColor: '#FF0000', inactiveTintColor: 'black'}}>
-      <Tab.Screen  name="Home" component={Home} initialRouteName={{userId:'Chua ton tai'}}  options={{tabBarLabel: 'Trang chủ', fontSize: 1, tabBarIcon: ({color}) => <Ionicons name='home' size={22} color={color} />}}/>
-      <Tab.Screen name="List" component={List} initialRouteName={{userId:'Chua ton tai'}}  options={{tabBarLabel: 'Danh mục', tabBarIcon: ({color}) => <FontAwesome name='list' size={23} color={color} />}} />
-      <Tab.Screen name="Love" component={Love} initialRouteName={{userId:'Chua ton tai'}}  options={{tabBarLabel: 'Yêu thích', tabBarIcon: ({color}) => <FontAwesome name='heart' size={23} color={color} />}} />
-      <Tab.Screen name="YourAccount" initialRouteName={{userId:'Chua ton tai', name: 'loi'}}  component={YourAccount} options={{tabBarLabel: 'Tôi', tabBarIcon: ({color}) => <FontAwesome name='user' size={23} color={color} />}} />
+      <Tab.Screen  name="Home" component={Home}   options={{tabBarLabel: 'Trang chủ', fontSize: 1, tabBarIcon: ({color}) => <Ionicons name='home' size={22} color={color} />}}/>
+      <Tab.Screen name="List" component={List}   options={{tabBarLabel: 'Danh mục', tabBarIcon: ({color}) => <FontAwesome name='list' size={23} color={color} />}} />
+      <Tab.Screen name="Love" component={Love}  options={{tabBarLabel: 'Yêu thích', tabBarIcon: ({color}) => <FontAwesome name='heart' size={23} color={color} />}} />
+      <Tab.Screen name="YourAccount"  component={YourAccount} options={{tabBarLabel: 'Tôi', tabBarIcon: ({color}) => <FontAwesome name='user' size={23} color={color} />}} />
     </Tab.Navigator>
   )
 }
@@ -55,7 +55,7 @@ function MyStackOfAdmin(){
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="Login" screenOptions={{
+    <Stack.Navigator initialRouteName="Home" screenOptions={{
         headerStyle: {
           backgroundColor: '#f4511e',
         },

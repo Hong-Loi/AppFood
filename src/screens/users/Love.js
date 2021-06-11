@@ -11,44 +11,40 @@ import {
   Dimensions,
   RefreshControl
 } from 'react-native';
-import RNRestart from 'react-native-restart';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const { width, height } = Dimensions.get('window');
 import firebase from '../../database/firebase';
 import { getUserId } from '../Login';
 import { getUserLike } from '../Login';
-import {getNewLike} from '../users/DetailProduct';
+import Loading from '../Loading';
 const wait = (timeout) => {
   return new Promise(resolve => setTimeout(resolve, timeout));
 }
 const Love = (props) => {
+  const [loading, setLoading] = useState(false)
+  var userId = getUserId();
+  var getLikeWhenLogin = getUserLike();
   const [refreshing, setRefreshing] = React.useState(false);
-
+  const [Like, setLike] = useState(getLikeWhenLogin);
   const onRefresh = React.useCallback(() => {
-    _search();
+    handleWhenUpdateLike();
     setRefreshing(true);
     wait(2000).then(() => setRefreshing(false));
   }, []);
 
-  var userId = getUserId();
-  var getLikeWhenLogin = getUserLike();
-  var getLikeNewFormUser = getNewLike();
-  var getLikeFormUser='';
-  if(getLikeNewFormUser!=null){
-    getLikeFormUser = getLikeNewFormUser;
+  const handleWhenUpdateLike = () => {
+    props.navigation.navigate('CartScreen');
   }
-  else{
-    getLikeFormUser=getLikeWhenLogin;
-  }
-  
-  
+
+
+
   //Get value of firebase
   const [food, setFood] = useState([]);
   const [foodLike, setFoodLike] = useState([]);
   const [user, setUser] = useState();
   const getUserById = async (id) => {
-    const dbRef = firebase.db.collection('tusers').doc(id);
+    const dbRef = firebase.db.collection('users').doc(id);
     const doc = await dbRef.get();
     const user = doc.data();
 
@@ -56,9 +52,15 @@ const Love = (props) => {
       ...user,
       id: doc.id
     })
+    setLoading(false);
+  }
+  if (loading) {
+    return (
+      <Loading />
+    )
   }
   useEffect(() => {
-    let isMounted=true;
+    let is = true;
     firebase.db.collection('foods').onSnapshot(querySnapshot => {
       const food = [];
       querySnapshot.docs.forEach(doc => {
@@ -74,38 +76,37 @@ const Love = (props) => {
       });
       setFood(food);
       getUserById(userId);
-      
-      var getItemIdLike = getLikeFormUser.split("-");
+
+      var getItemIdLike = Like.split("-");
       //delete arr[0]
       let showArr = getItemIdLike.filter((item) => {
         return item != 'noData';
       })
-      food.filter((item)=>{
-        for(let i=0; i< showArr.length;i++){
-           if(item.id===showArr[i]){
-             foodLike.push(item);
-           }
+      food.filter((item) => {
+        for (let i = 0; i < showArr.length; i++) {
+          if (item.id === showArr[i]) {
+            foodLike.push(item);
+          }
         }
-       
+
       })
       setFoodLike(foodLike);
       setDataSouce(foodLike);
     })
-    return () => { isMounted = false };
+    return () => { is = false };
   }, [])
   //Handle seacrch
   const [query, setQuery] = useState();
   const [dataSouce, setDataSouce] = useState([]);
   const _search = () => {
-    alert(getLikeFormUser);
     if (query == '') {
       setDataSouce(foodLike);
-  } else {
+    } else {
       // var toQuery = query.toLowerCase().toString();
       var toQuery = query;
       var newData = foodLike.filter(l => l.name.toLowerCase().match(toQuery));
       setDataSouce(newData);
-  }
+    }
   };
   const separator = () => {
     return (
@@ -128,17 +129,17 @@ const Love = (props) => {
           onChange={() => _search()}
           style={styles.input}
         />
-        <TouchableOpacity onPress={() => _search()}>
+        <TouchableOpacity onPress={() => handleWhenUpdateLike()}>
           <FontAwesome style={{ paddingHorizontal: 10 }} name='shopping-cart' size={28} color='black' />
         </TouchableOpacity>
       </View>
-      <FlatList   
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
-      }
+      <FlatList
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
         data={dataSouce}
         ItemSeparatorComponent={() => separator()}
         renderItem={({ item, index }) => {

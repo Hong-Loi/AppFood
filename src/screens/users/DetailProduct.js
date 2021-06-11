@@ -13,7 +13,8 @@ import {getUserId} from '../Login';
 import Loading from '../Loading';
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
-let getLike='';
+
+
 const DetailProduct = (props) => {
     //dialog
   const [visible, setVisible] = React.useState(false);
@@ -77,7 +78,7 @@ const DetailProduct = (props) => {
     const [user, setUser] = useState();
     //get user id
     const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('tusers').doc(id);
+        const dbRef = firebase.db.collection('users').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 
@@ -108,7 +109,7 @@ const DetailProduct = (props) => {
     //when user want add it in list like
     const _deleteFoodUserLike = async () =>{
         setColor('black');
-        const dbRef = firebase.db.collection('tusers').doc(userId);
+        const dbRef = firebase.db.collection('users').doc(userId);
         var strLike = food.id;
         //if user is not like this food
         var getItemIdLike = user.userLike.split("-");
@@ -126,11 +127,10 @@ const DetailProduct = (props) => {
             userLike: newStr,
             userCart: user.userCart
         })
-       getLike=user.userLike;
 
     }
     const updateLike = async () => {
-        const dbRef = firebase.db.collection('tusers').doc(userId);
+        const dbRef = firebase.db.collection('users').doc(userId);
         var strLike = food.id;
         //if user is not like this food
         var getItemIdLike = user.userLike.split("-");
@@ -152,7 +152,6 @@ const DetailProduct = (props) => {
             ])
         }
         else{
-            let isMoun=true;
             setColor('red');
              await dbRef.set({
                 password: user.password,
@@ -168,14 +167,11 @@ const DetailProduct = (props) => {
             setnIcon('💖');
             setColorA('green');
             toggleAlert();
-            getLike=user.userLike;
-            return()=>{ isMoun=false};
         }
- 
     }
      // update cart of user
      const updateCartForUser = async () => {
-        const dbRef = firebase.db.collection('tusers').doc(userId);
+        const dbRef = firebase.db.collection('users').doc(userId);
         var strCart = food.id;
         //if user is not like this food
         var getItemIdFoodInSort = user.userCart.split("-");
@@ -355,9 +351,6 @@ const DetailProduct = (props) => {
 
     )
 }
-export const getNewLike = ()=>{
-    return getLike;
-   }
 const styles = StyleSheet.create({
     container: {
         flex: 1,

@@ -2,13 +2,14 @@ import firebase from 'firebase';
 import 'firebase/firestore'
 
 var firebaseConfig = {
-    apiKey: "AIzaSyAj7f-SW8T68EVmA7_p-u-klwIZI2UuEgA",
-    authDomain: "appfood-20d1b.firebaseapp.com",
-    projectId: "appfood-20d1b",
-    storageBucket: "appfood-20d1b.appspot.com",
-    messagingSenderId: "287226943379",
-    appId: "1:287226943379:web:46c528adc5f79894367a66"
+    apiKey: "AIzaSyCN_dQB0-EkzeLAL0YrWhyPvbNT8fH1wbw",
+    authDomain: "appfood2-88536.firebaseapp.com",
+    projectId: "appfood2-88536",
+    storageBucket: "appfood2-88536.appspot.com",
+    messagingSenderId: "517638475663",
+    appId: "1:517638475663:web:6b1a2a6b0b670adb2e05fa"
   };
+
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
 

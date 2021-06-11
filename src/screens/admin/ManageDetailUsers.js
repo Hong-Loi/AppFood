@@ -17,7 +17,7 @@ const ManageDetailUsers = (props) => {
     const [loading, setLoading] = useState(true)
 
     const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('tusers').doc(id);
+        const dbRef = firebase.db.collection('users').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 
@@ -38,7 +38,7 @@ const ManageDetailUsers = (props) => {
         setUser({ ...user, [name]: value })
     }
     const deleteUser = async () => {
-        const dbRef = firebase.db.collection('tusers').doc(props.route.params.userId);
+        const dbRef = firebase.db.collection('users').doc(props.route.params.userId);
         await dbRef.delete();
         props.navigation.navigate('HomeAdmin');
     }
@@ -49,7 +49,7 @@ const ManageDetailUsers = (props) => {
         ])
     }
     const updateUser = async () => {
-        const dbRef = firebase.db.collection('tusers').doc(props.route.params.userId);
+        const dbRef = firebase.db.collection('users').doc(props.route.params.userId);
         await dbRef.set({
             password: user.password,
             email: user.email,

@@ -22,7 +22,7 @@ const ChangePassword = (props) => {
         setNewPassword({ ...newPassword, [name]: value })
     }
     const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('tusers').doc(id);
+        const dbRef = firebase.db.collection('users').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 
@@ -65,7 +65,7 @@ const ChangePassword = (props) => {
             try {
                 setShow('Bạn đã thay đổi mật khẩu thành công');
                 setColor('green');
-                const dbRef = firebase.db.collection('tusers').doc(props.route.params.userId);
+                const dbRef = firebase.db.collection('users').doc(props.route.params.userId);
                 await dbRef.set({
                     email: user.email,
                     phone: user.phone,

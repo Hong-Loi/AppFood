@@ -23,7 +23,7 @@ const Register = ({ navigation, route }) => {
   }
   useEffect(() => {
     let isMounted = true;
-    firebase.db.collection('tusers').onSnapshot(querySnapshot => {
+    firebase.db.collection('users').onSnapshot(querySnapshot => {
       const user = [];
       querySnapshot.docs.forEach(doc => {
         const { email, password, phone, address } = doc.data();
@@ -97,7 +97,7 @@ const Register = ({ navigation, route }) => {
     }
     else {
       try {
-        await firebase.db.collection('tusers').add({
+        await firebase.db.collection('users').add({
           email: state.email,
           password: state.password,
           phone: state.phone,

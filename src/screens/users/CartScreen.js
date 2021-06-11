@@ -1,44 +1,103 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView, StyleSheet, View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import COLORS from '../components/colors';
+import firebase from '../../database/firebase';
+import Loading from '../Loading';
+import { getUserId, getUserCart } from '../Login';
 
 const CartScreen = ({ navigation }) => {
+    const [loading, setLoading] = useState(false);
+    var userId = getUserId();
+    const [dataCart, setDataCart] = useState(getUserCart());
+    //Get value of firebase
+    const [food, setFood] = useState([]);
+    const [foodCart, setFoodCart] = useState([]);
+    const [user, setUser] = useState();
+    const getUserById = async (id) => {
+        const dbRef = firebase.db.collection('users').doc(id);
+        const doc = await dbRef.get();
+        const user = doc.data();
 
-    const foods = [
-        {
-            id: '1',
-            name: 'Meat Pizza',
-            ingredients: 'Mixed Pizza',
-            price: '8.30',
-            image: require('../../images/ham.jpg'),
-        },
-        {
-            id: '2',
-            name: 'Cheese Pizza',
-            ingredients: 'Cheese Pizza',
-            price: '7.10',
-            image: require('../../images/ham.jpg'),
-        },
-        {
-            id: '3',
-            name: 'Chicken Burger',
-            ingredients: 'Fried Chicken',
-            price: '5.10',
-            image: require('../../images/ham.jpg'),
-        },
-        {
-            id: '4',
-            name: 'Sushi Makizushi',
-            ingredients: 'Salmon Meat',
-            price: '9.55',
-            image: require('../../images/ham.jpg'),
-        },
-    ];
+        setUser({
+            ...user,
+            id: doc.id
+        })
+        setLoading(false);
+    }
+    if (loading) {
+        return (
+            <Loading />
+        )
+    }
+    useEffect(() => {
+        let mounted = true;
+        firebase.db.collection('foods').onSnapshot(querySnapshot => {
+            const food = [];
+            querySnapshot.docs.forEach(doc => {
+                const { name, linkImage, price, amount } = doc.data();
+                food.push({
+                    id: doc.id,
+                    name,
+                    linkImage,
+                    price,
+                    amount,
+                    count: 1
+                })
+            });
+            setFood(food);
+            getUserById(userId);
+         
+            var getItemIdCart = dataCart.split("-");
+            //delete arr[0]
+            let showArr = getItemIdCart.filter((item) => {
+                return item != 'noData';
+            })
+            food.filter((item) => {
+                for (let i = 0; i < showArr.length; i++) {
+                    if (item.id === showArr[i]) {
+                        foodCart.push(item);
+                    }
+                }
+
+            })
+            setFoodCart(foodCart);
+            _theBill();
+        })
+        return () => { mounted = false };
+    }, [])
+    //caculator bill
+    const [bill, setBil] = useState(0);
+    const _theBill = () => {
+        let theRuslt = 0;
+        for (let i = 0; i < foodCart.length; i++) {
+            var toInt = parseInt(foodCart[i].price);
+            theRuslt += toInt;
+        }
+        setBil(theRuslt);
+    }
+    //Change pay the bill
+    const _activeTheBill=()=>{
+           setDataCart(user.userCart);
+            alert(user.userCart);
+    }
+    //set food Count
+    const [itemCart, setItemCart] = useState([]);
+    const _addValue = (id) => {
+         //find id
+         let getFood = foodCart.filter((item)=>{
+             return item.id == id;
+         })
+         setItemCart(getFood);
+
+    }
+    const _subtractionValue = (count) => {
+        count = count - 5;
+    }
     const CartCard = ({ item }) => {
         return (
             <View style={style.cartCard}>
-                <Image source={item.image} style={{ height: 80, width: 80 }} />
+                <Image source={{ uri: (item.linkImage) }} style={{ height: 80, width: 80 }} />
                 <View
                     style={{
                         height: 100,
@@ -48,15 +107,15 @@ const CartScreen = ({ navigation }) => {
                     }}>
                     <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{item.name}</Text>
                     <Text style={{ fontSize: 13, color: COLORS.grey }}>
-                        {item.ingredients}
+                        Còn lại: {item.amount}
                     </Text>
-                    <Text style={{ fontSize: 17, fontWeight: 'bold' }}>${item.price}</Text>
+                    <Text style={{ fontSize: 17, fontWeight: 'bold' }}>đ{item.price}</Text>
                 </View>
                 <View style={{ marginRight: 20, alignItems: 'center' }}>
-                    <Text style={{ fontWeight: 'bold', fontSize: 18 }}>3</Text>
+                    <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{item.count}</Text>
                     <View style={style.actionBtn}>
-                        <Icon name="remove" size={25} color={COLORS.white} />
-                        <Icon name="add" size={25} color={COLORS.white} />
+                        <TouchableOpacity onPress={() => { _subtractionValue(item.id) }}><Icon name="remove" size={28} color={COLORS.white} /></TouchableOpacity>
+                        <TouchableOpacity onPress={() => { _addValue(item.id)  }}><Icon name="add" size={28} color={COLORS.white} /></TouchableOpacity>
                     </View>
                 </View>
             </View>
@@ -68,7 +127,7 @@ const CartScreen = ({ navigation }) => {
             <FlatList
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 80 }}
-                data={foods}
+                data={foodCart}
                 renderItem={({ item }) => <CartCard item={item} />}
                 ListFooterComponentStyle={{ paddingHorizontal: 20, marginTop: 20 }}
                 ListFooterComponent={() => (
@@ -79,21 +138,16 @@ const CartScreen = ({ navigation }) => {
                                 justifyContent: 'space-between',
                                 marginVertical: 15,
                             }}>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                                Tổng cộng
-                             </Text>
-                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>$50</Text>
-                        </View>
-                        <View style={{ marginHorizontal: 30 }}>
-                            <TouchableOpacity activeOpacity={0.8} >
-                                <View style={style.btnContainer}>
-                                    <Text style={style.title}>ok chua</Text>
-                                </View>
-                            </TouchableOpacity>
+
                         </View>
                     </View>
                 )}
             />
+            <TouchableOpacity activeOpacity={0.8} onPress={()=>{_activeTheBill()}}>
+                <View style={style.btnContainer}>
+                    <Text style={style.title}>{bill}đ - Thanh toán</Text>
+                </View>
+            </TouchableOpacity>
         </SafeAreaView>
     );
 };

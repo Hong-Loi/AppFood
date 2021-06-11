@@ -9,7 +9,8 @@ import {
     Image,
     FlatList,
     Dimensions,
-    
+    RefreshControl
+
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -18,20 +19,22 @@ import firebase from '../../database/firebase';
 import { getUserId } from '../Login';
 import Loading from '../Loading';
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
-import {  Button,Divider } from 'react-native-elements';
+import { Button, Divider, Avatar } from 'react-native-elements';
 const List = (props) => {
-      //dialog
-  const [visible, setVisible] = React.useState(false);
-  const toggleAlert = React.useCallback(() => {
-    setVisible(!visible);
-  }, [visible]);
-  const _closeApp=()=>{
-    setVisible(!visible);
-  }
-  //set notification
-  const [nIcon, setnIcon] = useState();
-  const [title, setTitle] = useState();
-  const [color, setColor] = useState();
+    const [index, setIndex] = useState(0);
+
+    //dialog
+    const [visible, setVisible] = React.useState(false);
+    const toggleAlert = React.useCallback(() => {
+        setVisible(!visible);
+    }, [visible]);
+    const _closeApp = () => {
+        setVisible(!visible);
+    }
+    //set notification
+    const [nIcon, setnIcon] = useState();
+    const [title, setTitle] = useState();
+    const [color, setColor] = useState();
     var userId = getUserId();
 
     // var userCart = getUserCart();
@@ -42,7 +45,7 @@ const List = (props) => {
     const [user, setUser] = useState();
     const [data, setData] = useState();
     const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('tusers').doc(id);
+        const dbRef = firebase.db.collection('users').doc(id);
         const doc = await dbRef.get();
         const user = doc.data();
 
@@ -75,7 +78,7 @@ const List = (props) => {
     }, [])
     // update cart of user
     const updateCartForUser = async (idFood) => {
-        const dbRef = firebase.db.collection('tusers').doc(userId);
+        const dbRef = firebase.db.collection('users').doc(userId);
         var strCart = idFood;
         //if user is not like this food
         var getItemIdFoodInSort = user.userCart.split("-");
@@ -129,11 +132,6 @@ const List = (props) => {
             setDataSouce(newData);
         }
     };
-    const separator = () => {
-        return (
-            <View style={{ height: 10, width: '100%', backgroundColor: '#e5e5e5' }} />
-        );
-    };
     if (loading) {
         <Loading />
     }
@@ -142,6 +140,7 @@ const List = (props) => {
 
 
     return (
+
         <View style={styles.container}>
             <View style={styles.header}>
 
@@ -152,19 +151,23 @@ const List = (props) => {
                     onChangeText={(query) => setQuery(query)}
                     onChange={() => _search()}
                     style={styles.input}
+                    onSubmitEditing={() => {
+                        _search();
+                    }}
                 />
                 <TouchableOpacity onPress={() => _search()}>
                     <FontAwesome style={{ paddingHorizontal: 10 }} name='shopping-cart' size={28} color='black' />
                 </TouchableOpacity>
             </View>
-            <FlatList
+ 
+            <FlatList style={{ padding: 15 }}
                 data={dataSouce}
-                ItemSeparatorComponent={() => separator()}
+
                 renderItem={({ item, index }) => {
                     return (
                         <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
                             <View style={styles.bookContainer}>
-                                <Image style={styles.image} source={{ uri: (item.linkImage) }} />
+                                <Avatar rounded style={styles.image} source={{ uri: (item.linkImage) }} />
                                 <View style={styles.dataContainer}>
                                     <Text numberOfLines={1} style={styles.title}>
                                         {item.name}
@@ -174,7 +177,7 @@ const List = (props) => {
                                     </Text>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <Text style={styles.author}>đ{item.price}</Text>
-                                        <TouchableOpacity onPress={() => updateCartForUser(item.id)} style={{ marginRight: 30 }} >
+                                        <TouchableOpacity onPress={() => updateCartForUser(item.id)} style={{ marginRight: 60 }} >
                                             <FontAwesome name='cart-plus' size={32} color='black' />
                                         </TouchableOpacity>
                                     </View>
@@ -197,7 +200,7 @@ const List = (props) => {
                     borderRadius: 80,
                     width: '100%',
                 }}>
-                    <Divider/><Text>{nIcon}</Text></View>}
+                    <Divider /><Text>{nIcon}</Text></View>}
                 style={{ backgroundColor: 'white' }}
             >
                 <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
@@ -213,6 +216,7 @@ const List = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#FFFFCC',
     },
     header: {
         height: 70,
@@ -233,7 +237,10 @@ const styles = StyleSheet.create({
     },
     bookContainer: {
         flexDirection: 'row',
-
+        borderWidth: 2,
+        borderColor: '#99FF99',
+        borderRadius: 20,
+        marginBottom: 15
     },
     image: {
         height: 100,

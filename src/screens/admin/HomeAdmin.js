@@ -10,7 +10,7 @@ const HomeAdmin = (props) =>{
     const [user,setUser]=useState([])
     
     useEffect(() => {
-        firebase.db.collection('tusers').onSnapshot(querySnapshot => {
+        firebase.db.collection('users').onSnapshot(querySnapshot => {
             const user = [];
             querySnapshot.docs.forEach(doc =>{
                 const {email, password, phone, address, imageUser} = doc.data();
