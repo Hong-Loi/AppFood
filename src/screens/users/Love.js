@@ -1,66 +1,53 @@
 
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
   Text,
   TextInput,
-  Image,
+  RefreshControl,
   FlatList,
   Dimensions,
-  RefreshControl
+
 } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-const { width, height } = Dimensions.get('window');
+
 import firebase from '../../database/firebase';
 import { getUserId } from '../Login';
-import { getUserLike } from '../Login';
 import Loading from '../Loading';
-const wait = (timeout) => {
-  return new Promise(resolve => setTimeout(resolve, timeout));
-}
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
+import { Button, Divider, Avatar } from 'react-native-elements';
+
+const { width, height } = Dimensions.get('window');
 const Love = (props) => {
-  const [loading, setLoading] = useState(false)
+  
+
+  //dialog
+  const [visible, setVisible] = React.useState(false);
+  const toggleAlert = React.useCallback(() => {
+    setVisible(!visible);
+  }, [visible]);
+  const _closeApp = () => {
+    setVisible(!visible);
+  }
+  //set notification
+  const [nIcon, setnIcon] = useState();
+  const [title, setTitle] = useState();
+  const [color, setColor] = useState();
+  const [dataCart, setDataCart] = useState([])
   var userId = getUserId();
-  var getLikeWhenLogin = getUserLike();
-  const [refreshing, setRefreshing] = React.useState(false);
-  const [Like, setLike] = useState(getLikeWhenLogin);
-  const onRefresh = React.useCallback(() => {
-    handleWhenUpdateLike();
-    setRefreshing(true);
-    wait(2000).then(() => setRefreshing(false));
-  }, []);
 
-  const handleWhenUpdateLike = () => {
-    props.navigation.navigate('CartScreen');
-  }
-
-
-
+  const [colorAlert, setColorAlert] = useState()
   //Get value of firebase
+  const [loading, setLoading] = useState(true);
   const [food, setFood] = useState([]);
-  const [foodLike, setFoodLike] = useState([]);
-  const [user, setUser] = useState();
-  const getUserById = async (id) => {
-    const dbRef = firebase.db.collection('users').doc(id);
-    const doc = await dbRef.get();
-    const user = doc.data();
-
-    setUser({
-      ...user,
-      id: doc.id
-    })
-    setLoading(false);
-  }
-  if (loading) {
-    return (
-      <Loading />
-    )
-  }
+  const [filterData, setFilterData] = useState([])
+  const [dataLike, setDataLike] = useState([])
   useEffect(() => {
-    let is = true;
+    let isMounted = true;
+    //Read all information foods
     firebase.db.collection('foods').onSnapshot(querySnapshot => {
       const food = [];
       querySnapshot.docs.forEach(doc => {
@@ -75,49 +62,113 @@ const Love = (props) => {
         })
       });
       setFood(food);
-      getUserById(userId);
 
-      var getItemIdLike = Like.split("-");
-      //delete arr[0]
-      let showArr = getItemIdLike.filter((item) => {
-        return item != 'noData';
+      ///read all information user like before
+      firebase.db.collection('usersLike').onSnapshot(querySnapshot => {
+        const dataLike = [];
+        querySnapshot.docs.forEach(doc => {
+          const { idFood, idUser, } = doc.data();
+          dataLike.push({
+            id: doc.id,
+            idFood,
+            idUser
+          })
+        });
+        setDataLike(dataLike);
       })
-      food.filter((item) => {
-        for (let i = 0; i < showArr.length; i++) {
-          if (item.id === showArr[i]) {
-            foodLike.push(item);
-          }
-        }
 
+      //find by source
+
+      //read all information user with cart before
+      firebase.db.collection('addToCart').onSnapshot(querySnapshot => {
+        const dataCart = [];
+        querySnapshot.docs.forEach(doc => {
+          const { idFood, idUser, } = doc.data();
+          dataCart.push({
+            id: doc.id,
+            idFood,
+            idUser
+          })
+        });
+        setDataCart(dataCart);
       })
-      setFoodLike(foodLike);
-      setDataSouce(foodLike);
+
     })
-    return () => { is = false };
+    return () => { isMounted = false };
   }, [])
+
+  //add to list cart for user
+  const addDataCart = async (idFood) => {
+
+    try {
+      await firebase.db.collection('addToCart').add({
+        idUser: userId,
+        idFood: idFood,
+        amountFood: 1
+      })
+      setTitle('Thêm món ăn vào giỏ hàng thành công^^');
+      setnIcon('✔');
+      setColor('red');
+      setColorAlert('green');
+      toggleAlert();
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  // button add to cart
+  const updateCartForUser = async (idFood) => {
+    var checkCartExist = 0;
+    dataCart.filter((item) => {
+      if (item.idFood === idFood && item.idUser === userId) {
+        checkCartExist++;
+      }
+    })
+    if (checkCartExist > 0) {
+      setTitle('Bạn đã thêm món ăn này vào giỏ hàng');
+      setnIcon('✔');
+      setColorAlert('green');
+      toggleAlert();
+    }
+    else {
+      addDataCart(idFood);
+    }
+  }
   //Handle seacrch
   const [query, setQuery] = useState();
   const [dataSouce, setDataSouce] = useState([]);
+
   const _search = () => {
     if (query == '') {
-      setDataSouce(foodLike);
+      setDataSouce(filterData);
     } else {
       // var toQuery = query.toLowerCase().toString();
       var toQuery = query;
-      var newData = foodLike.filter(l => l.name.toLowerCase().match(toQuery));
+      var newData = filterData.filter(l => l.name.toLowerCase().match(toQuery));
       setDataSouce(newData);
     }
   };
-  const separator = () => {
-    return (
-      <View style={{ height: 10, width: '100%', backgroundColor: '#e5e5e5' }} />
-    );
-  };
+  const _callAgain = useCallback(() => {
+    const filterData = [];
+    for (let x = 0; x < food.length; x++) {
+      for (let y = 0; y < dataLike.length; y++) {
+        if (food[x].id === dataLike[y].idFood && dataLike[y].idUser === userId) {
+          filterData.push(food[x]);
+        }
+      }
+    }
+    setFilterData(filterData);
+    setDataSouce(filterData);
+  })
+  if (loading) {
+    <Loading />
+  }
   //handle food user like
 
 
 
   return (
+
     <View style={styles.container}>
       <View style={styles.header}>
 
@@ -128,25 +179,22 @@ const Love = (props) => {
           onChangeText={(query) => setQuery(query)}
           onChange={() => _search()}
           style={styles.input}
+          onSubmitEditing={() => {
+            _search();
+          }}
         />
-        <TouchableOpacity onPress={() => handleWhenUpdateLike()}>
-          <FontAwesome style={{ paddingHorizontal: 10 }} name='shopping-cart' size={28} color='black' />
+        <TouchableOpacity onPress={() => _callAgain()}>
+          <FontAwesome style={{ paddingHorizontal: 10 }} name='bell' size={28} color='black' />
         </TouchableOpacity>
       </View>
-      <FlatList
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        }
+
+      <FlatList style={{ padding: 15 }}
         data={dataSouce}
-        ItemSeparatorComponent={() => separator()}
         renderItem={({ item, index }) => {
           return (
             <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
               <View style={styles.bookContainer}>
-                <Image style={styles.image} source={{ uri: (item.linkImage) }} />
+                <Avatar rounded style={styles.image} source={{ uri: (item.linkImage) }} />
                 <View style={styles.dataContainer}>
                   <Text numberOfLines={1} style={styles.title}>
                     {item.name}
@@ -156,7 +204,7 @@ const Love = (props) => {
                   </Text>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text style={styles.author}>đ{item.price}</Text>
-                    <TouchableOpacity style={{ marginRight: 30 }}>
+                    <TouchableOpacity onPress={() => updateCartForUser(item.id)} style={{ marginRight: 60 }} >
                       <FontAwesome name='cart-plus' size={32} color='black' />
                     </TouchableOpacity>
                   </View>
@@ -167,6 +215,26 @@ const Love = (props) => {
           );
         }}
       />
+      {/* show dialog */}
+      <FancyAlert
+        visible={visible}
+        icon={<View style={{
+          flex: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: (colorAlert),
+          borderRadius: 80,
+          width: '100%',
+        }}>
+          <Divider /><Text>{nIcon}</Text></View>}
+        style={{ backgroundColor: 'white' }}
+      >
+        <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
+        <View style={{ paddingHorizontal: 30 }}>
+          <Button style={{ paddingHorizontal: 40 }} title='Đóng' onPress={() => _closeApp()} />
+        </View>
+      </FancyAlert>
     </View>
   );
 
@@ -175,6 +243,7 @@ const Love = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFCC',
   },
   header: {
     height: 70,
@@ -195,7 +264,10 @@ const styles = StyleSheet.create({
   },
   bookContainer: {
     flexDirection: 'row',
-
+    borderWidth: 2,
+    borderColor: '#99FF99',
+    borderRadius: 20,
+    marginBottom: 15
   },
   image: {
     height: 100,

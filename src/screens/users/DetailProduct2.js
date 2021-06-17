@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, FlatList, Image, Linking,Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, FlatList, Image, Linking, Alert } from 'react-native';
 import firebase from '../../database/firebase';
 import { Card } from 'react-native-elements';
 import color from 'color';
@@ -9,69 +9,105 @@ import { Divider } from 'react-native-elements';
 import { Button } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native';
 import { Tab } from 'react-native-elements';
-import {getUserId} from '../Login';
+import { getUserId } from '../Login';
 import Loading from '../Loading';
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
 
+
 const DetailProduct2 = (props) => {
     //dialog
-  const [visible, setVisible] = React.useState(false);
-  const toggleAlert = React.useCallback(() => {
-    setVisible(!visible);
-  }, [visible]);
-  const _closeApp=()=>{
-    setVisible(!visible);
-  }
-  //set notification
-  const [nIcon, setnIcon] = useState();
-  const [title, setTitle] = useState();
-  const [colorA, setColorA] = useState();
+    const [visible, setVisible] = React.useState(false);
+    const toggleAlert = React.useCallback(() => {
+        setVisible(!visible);
+    }, [visible]);
+    const _closeApp = () => {
+        setVisible(!visible);
+    }
+    //set notification
+    const [nIcon, setnIcon] = useState();
+    const [title, setTitle] = useState();
     var userId = getUserId();
-    var count =0;
+    var count = 0;
     const [dataFood, seteDataFood] = useState([])
     const [color, setColor] = useState()
+    const [colorAlert, setColorAlert] = useState()
     const [dataViewOne, setDataViewOne] = useState()
     const [dataViewTwo, setDataViewTwo] = useState()
+    const [dataLike, setDataLike] = useState([])
+    const [dataCart, setDataCart] = useState([])
     useEffect(() => {
-        let isMounted=true;
+        let isMounted = true;
         firebase.db.collection('foods').onSnapshot(querySnapshot => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
 
                 const { name, linkImage, price, sold, description } = doc.data();
-                    dataFood.push({
-                        id: doc.id,
-                        name,
-                        linkImage,
-                        price,
-                        sold,
-                        description,
-                    })
+                dataFood.push({
+                    id: doc.id,
+                    name,
+                    linkImage,
+                    price,
+                    sold,
+                    description,
+                })
             });
+            //read data like of users
+            getFoodById(props.route.params.foodId);
+            getUserById(userId);
+
+            ///read all information user like before
+            firebase.db.collection('usersLike').onSnapshot(querySnapshot => {
+                const dataLike = [];
+                querySnapshot.docs.forEach(doc => {
+                    const { idFood, idUser, } = doc.data();
+                    dataLike.push({
+                        id: doc.id,
+                        idFood,
+                        idUser
+                    })
+                });
+                setDataLike(dataLike);
+            })
+              //read all information user with cart before
+              firebase.db.collection('addToCart').onSnapshot(querySnapshot => {
+                const dataCart = [];
+                querySnapshot.docs.forEach(doc => {
+                    const { idFood, idUser, } = doc.data();
+                    dataCart.push({
+                        id: doc.id,
+                        idFood,
+                        idUser
+                    })
+                });
+                setDataCart(dataCart);
+            })
+
+            
             seteDataFood(dataFood);
-           let getTopViewFood = dataFood.sort(function (x, y) {
-               return y.View - x.View;
-           })
-           //handle dataview one for list view
-          
-           const dataViewOne=[];
-           const dataViewTwo=[];
-           for(let i=0;i<getTopViewFood.length;i++){
-               count++;
-               if(count%2==0&&count<=10){
-                   dataViewOne.push(getTopViewFood[i]);
-               }
-               else if(count%2!=0&&count<=10){
-                   dataViewTwo.push(getTopViewFood[i]);
-               }
-           }
-           setDataViewOne(dataViewOne);
-           setDataViewTwo(dataViewTwo);
+            let getTopViewFood = dataFood.sort(function (x, y) {
+                return y.View - x.View;
+            })
+            //handle dataview one for list view
+
+            const dataViewOne = [];
+            const dataViewTwo = [];
+            for (let i = 0; i < getTopViewFood.length; i++) {
+                count++;
+                if (count % 2 == 0 && count <= 10) {
+                    dataViewOne.push(getTopViewFood[i]);
+                }
+                else if (count % 2 != 0 && count <= 10) {
+                    dataViewTwo.push(getTopViewFood[i]);
+                }
+            }
+           
+            setDataViewOne(dataViewOne);
+            setDataViewTwo(dataViewTwo);
         })
         return () => { isMounted = false };
     },
-     [])
+        [])
     const [food, setFood] = useState();
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState();
@@ -99,124 +135,102 @@ const DetailProduct2 = (props) => {
         })
         setLoading(false);
     }
-    useEffect(() => {
-        let isMounte=true;
-        getFoodById(props.route.params.foodId);
-        getUserById(userId);
-        return () => { isMounte = false };
-    }, [])
+   
     //when user want add it in list like
-    const _deleteFoodUserLike = async () =>{
+    const _deleteFoodUserLike = async () => {
+        let idLike = [];
+        dataLike.filter((item) => {
+            if (item.idFood === props.route.params.foodId && item.idUser == userId) {
+                idLike = item;
+
+            }
+        })
+        const dbRef = firebase.db.collection('usersLike').doc(idLike.id);
+        await dbRef.delete();
         setColor('black');
-        const dbRef = firebase.db.collection('users').doc(userId);
-        var strLike = food.id;
-        //if user is not like this food
-        var getItemIdLike = user.userLike.split("-");
-        let deleteThisFood = getItemIdLike.filter((item)=>{
-            return item!=strLike;
-        })
-        var newStr = deleteThisFood.join('-');
-        await dbRef.set({
-            password: user.password,
-            email: user.email,
-            phone: user.phone,
-            address: user.address,
-            role: 0,
-            imageUser: user.imageUser,
-            userLike: newStr,
-            userCart: user.userCart
-        })
 
     }
-    const updateLike = async () => {
-        const dbRef = firebase.db.collection('users').doc(userId);
-        var strLike = food.id;
-        //if user is not like this food
-        var getItemIdLike = user.userLike.split("-");
-        let showArr = getItemIdLike.filter((item)=>{
-            return item!='noData';
-        })
-        //Check food vaild in list 
-        let check=false;
-        for(let i=0;i < showArr.length;i++){
-            if(showArr[i]==strLike){
-                check=true;
-            }
+    //Add to list like in firebase
+    const addDataLike = async () => {
+        let isMounted = true;
+        try {
+            await firebase.db.collection('usersLike').add({
+                idUser: userId,
+                idFood: props.route.params.foodId
+            })
+            setTitle('Thêm vào danh sách yêu thích thành công^^');
+            setnIcon('💖');
+            setColor('red');
+            setColorAlert('green');
+            toggleAlert();
+
+        } catch (error) {
+            console.log(error);
         }
-        if(check==true){
+        return () => { isMounted = false };
+    }
+    //add to list cart for user
+    const addDataCart = async () => {
+        let isMounted = true;
+        try {
+            await firebase.db.collection('addToCart').add({
+                idUser: userId,
+                idFood: props.route.params.foodId,
+                amountFood: 1
+            })
+            setTitle('Thêm món ăn vào giỏ hàng thành công^^');
+            setnIcon('✔');
+            setColor('red');
+            setColorAlert('green');
+            toggleAlert();
+
+        } catch (error) {
+            console.log(error);
+        }
+        return () => { isMounted = false };
+    }
+    //button tym
+    const updateLike = async () => {
+        var checkLikeExist = 0;
+        dataLike.filter((item) => {
+            if (item.idFood === props.route.params.foodId&&item.idUser===userId) {
+                checkLikeExist++;
+            }
+        })
+        if (checkLikeExist > 0) {
             setColor('red');
             Alert.alert('Bạn muốn xoá món ăn ra khỏi danh sách yêu thích?', '[]~(￣▽￣)~*', [
                 { text: 'Có', onPress: () => _deleteFoodUserLike() },
                 { text: 'Không', onPress: () => console.log(false) },
             ])
         }
-        else{
-            let isMount=true;
-            setColor('red');
-             await dbRef.set({
-                password: user.password,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                role: 0,
-                imageUser: user.imageUser,
-                userLike: user.userLike + '-' + strLike,
-                userCart: user.userCart
-            })
-            setTitle('Thêm vào danh sách yêu thích thành công');
-            setnIcon('💖');
-            setColorA('green');
-            toggleAlert();
-            return isMount=false;
+        else {
+            addDataLike();
         }
- 
+
     }
-     // update cart of user
-     const updateCartForUser = async () => {
-        const dbRef = firebase.db.collection('users').doc(userId);
-        var strCart = food.id;
-        //if user is not like this food
-        var getItemIdFoodInSort = user.userCart.split("-");
-        let showArr = getItemIdFoodInSort.filter((item) => {
-            return item != 'noData';
-        })
-        //Check food vaild in list 
-        let check = false;
-        for (let i = 0; i < showArr.length; i++) {
-            if (showArr[i] == strCart) {
-                check = true;
+    // update cart of user
+    const updateCartForUser = async () => {
+        var checkCartExist = 0;
+        dataCart.filter((item) => {
+            if (item.idFood === props.route.params.foodId&&item.idUser===userId) {
+                checkCartExist++;
             }
-        }
-        if (check == true) {
-            setTitle('Bạn đã thêm món ăn này vào giỏ hàng rồi');
+        })
+        if (checkCartExist > 0) {
+            setTitle('Bạn đã thêm món ăn này vào giỏ hàng');
             setnIcon('✔');
-            setColorA('green');
+            setColorAlert('green');
             toggleAlert();
         }
         else {
-            let isM =true;
-            setTitle('Thêm thành công vào giỏ hàng');
-            setnIcon('✔');
-            setColorA('green');
-            toggleAlert();
-            await dbRef.set({
-                password: user.password,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                role: 0,
-                imageUser: user.imageUser,
-                userLike: user.userLike,
-                userCart: user.userCart + '-' + strCart
-            })
-       
-          return isM=false;
+            addDataCart();
         }
 
     }
     if (loading) {
         return (
-           <Loading/>
+            <Loading />
         )
     }
     return (
@@ -229,7 +243,7 @@ const DetailProduct2 = (props) => {
                     <Text style={styles.sTitle}>{food.name}</Text>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                         <Text style={styles.sPrice}>Giá: {food.price} vnđ</Text>
-                        <TouchableOpacity onPress={()=>updateLike()} style={{marginRight: 14}}>
+                        <TouchableOpacity onPress={() => updateLike()} style={{ marginRight: 14 }}>
                             <FontAwesome name='heart' size={30} color={color} />
                         </TouchableOpacity>
                     </View>
@@ -291,7 +305,7 @@ const DetailProduct2 = (props) => {
                                         renderItem={({ item }) => {
 
                                             return (
-                                                <TouchableOpacity onPress={() => props.navigation.replace('DetailProduct2', { foodId: item.id })}>
+                                                <TouchableOpacity onPress={() => props.navigation.replace('DetailProduct', { foodId: item.id })}>
                                                     <View style={styles.item}>
                                                         <Image source={{ uri: (item.linkImage) }} style={{ width: 133, height: 160, marginLeft: 0, resizeMode: 'stretch' }} />
                                                         <Divider style={{ backgroundColor: 'white' }} />
@@ -322,33 +336,33 @@ const DetailProduct2 = (props) => {
                     <Divider />
                     <Divider style={{ backgroundColor: 'blue' }} />
                     <TouchableOpacity style={{ flex: 1, backgroundColor: '#259d55', borderRightWidth: 1, borderLeftWidth: 1 }}>
-                        <Button onPress={()=>_deleteFoodUserLike()}  type="clear" icon={<FontAwesome name='comment' size={31} color='white' />} />
+                        <Button onPress={() => _deleteFoodUserLike()} type="clear" icon={<FontAwesome name='comment' size={31} color='white' />} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={()=>updateCartForUser()} style={{ flex: 1.5, backgroundColor: 'red', color: 'red', alignItems: 'center', justifyContent: 'center' }}>
+                    <TouchableOpacity onPress={() => updateCartForUser()} style={{ flex: 1.5, backgroundColor: 'red', color: 'red', alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontSize: 22, color: 'white', }}>Mua ngay</Text>
                     </TouchableOpacity>
 
                 </View>
             </Tab>
-              {/* show dialog */}
-      <FancyAlert
-        visible={visible}
-        icon={<View style={{
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: (colorA),
-          borderRadius: 80,
-          width: '100%',
-        }}><Text>{nIcon}</Text></View>}
-        style={{ backgroundColor: 'white' }}
-      >
-        <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
-      <View style={{paddingHorizontal: 30}}>
-      <Button style={{paddingHorizontal: 40}} title='Đóng' onPress={() => _closeApp()} />
-      </View>
-      </FancyAlert>
+            {/* show dialog */}
+            <FancyAlert
+                visible={visible}
+                icon={<View style={{
+                    flex: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: (colorAlert),
+                    borderRadius: 80,
+                    width: '100%',
+                }}><Text>{nIcon}</Text></View>}
+                style={{ backgroundColor: 'white' }}
+            >
+                <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
+                <View style={{ paddingHorizontal: 30 }}>
+                    <Button style={{ paddingHorizontal: 40 }} title='Đóng' onPress={() => _closeApp()} />
+                </View>
+            </FancyAlert>
         </View>
 
     )
@@ -375,7 +389,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'black',
         marginTop: 30,
-    
+
     },
     vFood: {
         padding: 0,

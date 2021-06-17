@@ -24,6 +24,7 @@ import ChangePassword from './src/screens/users/ChangePassword';
 import CreateFood from './src/screens/admin/CreateFood';
 import Introduce from './src/screens/users/Introduce';
 import Support from './src/screens/users/Support';
+import HistoryCart from './src/screens/users/HistoryCart';
 
 
 const Stack = createStackNavigator();
@@ -55,7 +56,7 @@ function MyStackOfAdmin(){
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="Home" screenOptions={{
+    <Stack.Navigator initialRouteName="HistoryCart" screenOptions={{
         headerStyle: {
           backgroundColor: '#f4511e',
         },
@@ -72,6 +73,7 @@ export default function App() {
       <Stack.Screen name="DetailProduct" component={DetailProduct} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="DetailProduct2" component={DetailProduct2} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="SettingUser" component={SettingUser} options={{title: 'Cài đặt tài khoản'}} />
+      <Stack.Screen name="HistoryCart" component={HistoryCart} options={{title: 'Lịch sử đơn hàng'}} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} options={{title: 'Đổi mật khẩu'}} />
       <Stack.Screen name="CartScreen" component={CartScreen} options={{title: 'Giỏ hàng'}} />
       <Stack.Screen name="Introduce" component={Introduce} options={{title: 'Giới thiệu'}} />

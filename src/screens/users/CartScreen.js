@@ -1,197 +1,272 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { SafeAreaView, StyleSheet, View, Text, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import COLORS from '../components/colors';
 import firebase from '../../database/firebase';
 import Loading from '../Loading';
-import { getUserId, getUserCart } from '../Login';
+import { Button, Avatar } from 'react-native-elements';
+import { getUserId } from '../Login';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { FancyAlert } from 'react-native-expo-fancy-alerts';
+const { width, height } = Dimensions.get('window');
 
 const CartScreen = ({ navigation }) => {
-    const [loading, setLoading] = useState(false);
     var userId = getUserId();
-    const [dataCart, setDataCart] = useState(getUserCart());
-    //Get value of firebase
+    //Declare to using dialog
+    const [colorAlert, setColorAlert] = useState()
+    const [visible, setVisible] = React.useState(false);
+    const [title, setTitle] = useState();
+    const toggleAlert = React.useCallback(() => {
+        setVisible(!visible);
+    }, [visible]);
+    const [nIcon, setnIcon] = useState();
+    //Loading
+    const [loading, setLoading] = useState(true);
     const [food, setFood] = useState([]);
-    const [foodCart, setFoodCart] = useState([]);
-    const [user, setUser] = useState();
-    const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('users').doc(id);
-        const doc = await dbRef.get();
-        const user = doc.data();
-
-        setUser({
-            ...user,
-            id: doc.id
-        })
-        setLoading(false);
-    }
-    if (loading) {
-        return (
-            <Loading />
-        )
-    }
+    const [filterData, setFilterData] = useState([])
+    const [dataCart, setDataCart] = useState([])
+    const [total, setTotal] = useState(0)
     useEffect(() => {
-        let mounted = true;
+        let isMounted = true;
+        //Read all information foods
         firebase.db.collection('foods').onSnapshot(querySnapshot => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
-                const { name, linkImage, price, amount } = doc.data();
+                const { name, linkImage, price, sold } = doc.data();
                 food.push({
                     id: doc.id,
                     name,
                     linkImage,
                     price,
-                    amount,
-                    count: 1
+                    sold
                 })
             });
             setFood(food);
-            getUserById(userId);
-         
-            var getItemIdCart = dataCart.split("-");
-            //delete arr[0]
-            let showArr = getItemIdCart.filter((item) => {
-                return item != 'noData';
-            })
-            food.filter((item) => {
-                for (let i = 0; i < showArr.length; i++) {
-                    if (item.id === showArr[i]) {
-                        foodCart.push(item);
-                    }
-                }
 
+            ///read all information user like before
+            firebase.db.collection('addToCart').onSnapshot(querySnapshot => {
+                const dataCart = [];
+                querySnapshot.docs.forEach(doc => {
+                    const { idFood, idUser, amountFood } = doc.data();
+                    dataCart.push({
+                        id: doc.id,
+                        idFood,
+                        idUser,
+                        amountFood
+                    })
+                });
+                setDataCart(dataCart);
             })
-            setFoodCart(foodCart);
-            _theBill();
+
+
+            //read all information user with cart before
+            firebase.db.collection('addToCart').onSnapshot(querySnapshot => {
+                const dataCart = [];
+                querySnapshot.docs.forEach(doc => {
+                    const { idFood, idUser, } = doc.data();
+                    dataCart.push({
+                        id: doc.id,
+                        idFood,
+                        idUser
+                    })
+                });
+                setDataCart(dataCart);
+            })
+
         })
-        return () => { mounted = false };
+        return () => { isMounted = false };
     }, [])
-    //caculator bill
-    const [bill, setBil] = useState(0);
-    const _theBill = () => {
-        let theRuslt = 0;
-        for (let i = 0; i < foodCart.length; i++) {
-            var toInt = parseInt(foodCart[i].price);
-            theRuslt += toInt;
-        }
-        setBil(theRuslt);
+    //Close dialog
+    const _closeApp = () => {
+        setVisible(!visible);
     }
-    //Change pay the bill
-    const _activeTheBill=()=>{
-           setDataCart(user.userCart);
-            alert(user.userCart);
+    //call again data flatlist
+    const _callAgain = useCallback(() => {
+        const filterData = [];
+        var total = 0;
+        for (let x = 0; x < food.length; x++) {
+            for (let y = 0; y < dataCart.length; y++) {
+                if (food[x].id === dataCart[y].idFood && dataCart[y].idUser === userId) {
+                    filterData.push(food[x]);
+                    var toInt = parseInt(food[x].price);
+                    total += toInt;
+                }
+            }
+        }
+        setTotal(total);
+        setFilterData(filterData);
+    })
+    //Clear data after invoice and add data item
+    const _clearData = async () => {
+        for (let y = 0; y < dataCart.length; y++) {
+            if (dataCart[y].idUser === userId) {
+                try {
+                    await firebase.db.collection('invoiceItem').add({
+                        idUser: userId,
+                        createdAt: new Date().toLocaleString().replace(",", "").replace(/:.. /, " "),
+                        idFood: dataCart[y].idFood,
+                        amountFood: '0'
+                    })
+
+                } catch (error) {
+                    console.log(error);
+                }
+                const dbRef = firebase.db.collection('addToCart').doc(dataCart[y].id);
+                await dbRef.delete();
+            }
+        }
+    }
+
+    //Invoice
+    const _invoice = async () => {
+        //Check cart user not null to add
+
+        if (total != 0) {
+            try {
+                await firebase.db.collection('invoice').add({
+                    idUser: userId,
+                    createdAt: new Date().toLocaleString().replace(",", "").replace(/:.. /, " "),
+                    status: 'Đang chờ',
+                    total: total
+                })
+                setTitle('Thanh toán thành công');
+                setnIcon('✔');
+                setColorAlert('green');
+                toggleAlert();
+                _clearData();
+
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            setTitle('Thanh toán thất bại');
+            setnIcon('✖');
+            setColorAlert('red');
+            toggleAlert();
+            _clearData();
+        }
+
     }
     //set food Count
-    const [itemCart, setItemCart] = useState([]);
-    const _addValue = (id) => {
-         //find id
-         let getFood = foodCart.filter((item)=>{
-             return item.id == id;
-         })
-         setItemCart(getFood);
+    const _subValue = async (foodId) => {
+        let isMounted = true;
+        let idCart = [];
+        dataCart.filter((item) => {
+            if (item.idFood === foodId && item.idUser == userId) {
+                idCart = item;
+            }
+        })
+        const dbRef = firebase.db.collection('addToCart').doc(idCart.id);
+        await dbRef.delete();
+        return () => { isMounted = false };
+    }
 
+    if (loading) {
+        <Loading />
     }
-    const _subtractionValue = (count) => {
-        count = count - 5;
-    }
-    const CartCard = ({ item }) => {
-        return (
-            <View style={style.cartCard}>
-                <Image source={{ uri: (item.linkImage) }} style={{ height: 80, width: 80 }} />
-                <View
-                    style={{
-                        height: 100,
-                        marginLeft: 10,
-                        paddingVertical: 20,
-                        flex: 1,
-                    }}>
-                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{item.name}</Text>
-                    <Text style={{ fontSize: 13, color: COLORS.grey }}>
-                        Còn lại: {item.amount}
-                    </Text>
-                    <Text style={{ fontSize: 17, fontWeight: 'bold' }}>đ{item.price}</Text>
-                </View>
-                <View style={{ marginRight: 20, alignItems: 'center' }}>
-                    <Text style={{ fontWeight: 'bold', fontSize: 18 }}>{item.count}</Text>
-                    <View style={style.actionBtn}>
-                        <TouchableOpacity onPress={() => { _subtractionValue(item.id) }}><Icon name="remove" size={28} color={COLORS.white} /></TouchableOpacity>
-                        <TouchableOpacity onPress={() => { _addValue(item.id)  }}><Icon name="add" size={28} color={COLORS.white} /></TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        );
-    };
+
     return (
-        <SafeAreaView style={{ backgroundColor: COLORS.white, flex: 1 }}>
 
-            <FlatList
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 80 }}
-                data={foodCart}
-                renderItem={({ item }) => <CartCard item={item} />}
-                ListFooterComponentStyle={{ paddingHorizontal: 20, marginTop: 20 }}
-                ListFooterComponent={() => (
-                    <View>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                                marginVertical: 15,
-                            }}>
+        <View style={styles.container}>
+            <Button title="Refresh" onPress={() => _callAgain()} />
+            <FlatList style={{ padding: 15 }}
+                data={filterData}
+                renderItem={({ item, index }) => {
+                    return (
 
+                        <View style={styles.bookContainer}>
+                            <TouchableOpacity onPress={() => navigation.navigate('DetailProduct', { foodId: item.id })}>
+                                <Avatar rounded style={styles.image} source={{ uri: (item.linkImage) }} />
+                            </TouchableOpacity>
+                            <View style={styles.dataContainer}>
+                                <Text numberOfLines={1} style={styles.title}>
+                                    {item.name}
+                                </Text>
+                                <Text numberOfLines={4} style={styles.description}>
+
+                                </Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                    <Text style={styles.author}>đ{item.price}</Text>
+                                    <TouchableOpacity onPress={() => _subValue(item.id)} style={{ marginRight: 60 }} >
+                                        <FontAwesome name='close' size={32} color='black' />
+                                    </TouchableOpacity>
+                                </View>
+
+                            </View>
                         </View>
-                    </View>
-                )}
+
+                    );
+                }}
             />
-            <TouchableOpacity activeOpacity={0.8} onPress={()=>{_activeTheBill()}}>
-                <View style={style.btnContainer}>
-                    <Text style={style.title}>{bill}đ - Thanh toán</Text>
+            <View style={{ paddingTop: 5 }}><Button onPress={() => _invoice()} icon={{
+                name: "check",
+                size: 25,
+                color: "white"
+            }} style={{ padding: 15, borderRadius: 20 }} title={'Thanh toán  -  ' + total + 'đ'} /></View>
+            {/* show dialog */}
+            <FancyAlert
+                visible={visible}
+                icon={<View style={{
+                    flex: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: (colorAlert),
+                    borderRadius: 80,
+                    width: '100%',
+                }}><Text>{nIcon}</Text></View>}
+                style={{ backgroundColor: 'white' }}
+            >
+                <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
+                <View style={{ paddingHorizontal: 30 }}>
+                    <Button style={{ paddingHorizontal: 40 }} title='Đóng' onPress={() => _closeApp()} />
                 </View>
-            </TouchableOpacity>
-        </SafeAreaView>
+            </FancyAlert>
+        </View>
+
     );
-};
-const style = StyleSheet.create({
-    header: {
-        paddingVertical: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginHorizontal: 20,
+
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#FFFFCC',
     },
-    cartCard: {
+
+
+    bookContainer: {
+        flexDirection: 'row',
+        borderWidth: 2,
+        borderColor: '#99FF99',
+        borderRadius: 20,
+        marginBottom: 15
+    },
+    image: {
         height: 100,
-        elevation: 15,
-        borderRadius: 10,
-        backgroundColor: COLORS.white,
-        marginVertical: 10,
-        marginHorizontal: 20,
-        paddingHorizontal: 10,
-        flexDirection: 'row',
-        alignItems: 'center',
+        width: 120,
     },
-    actionBtn: {
-        width: 80,
-        height: 30,
-        backgroundColor: COLORS.primary,
-        borderRadius: 30,
-        paddingHorizontal: 5,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignContent: 'center',
+    dataContainer: {
+        padding: 10,
+        paddingTop: 5,
+        width: width - 100,
     },
-    title:
-    {
-        color: COLORS.white,
+    title: {
+        fontSize: 17,
         fontWeight: 'bold',
-        fontSize: 18
+        color: '#000',
     },
-    btnContainer: {
-        backgroundColor: COLORS.primary,
-        height: 60,
-        borderRadius: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
+    description: {
+        fontSize: 16,
+        color: 'gray',
+    },
+    author: {
+        fontSize: 18,
+        textAlign: 'left',
+        paddingTop: 15,
+        color: '#fe6132'
     },
 });
+
 
 export default CartScreen;

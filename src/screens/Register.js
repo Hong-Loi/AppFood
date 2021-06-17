@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ImageBackground, StyleSheet, Text, View, Image, Keyboard } from "react-native";
-import { Input,Button } from 'react-native-elements';
+import { Input, Button } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../database/firebase';
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
@@ -17,8 +17,7 @@ const Register = ({ navigation, route }) => {
   const [title, setTitle] = useState();
   const [color, setColor] = useState();
   const [user, setUser] = useState([])
-  const _closeApp=()=>{
-    navigation.navigate('Login');
+  const _closeApp = () => {
     setVisible(!visible);
   }
   useEffect(() => {
@@ -50,15 +49,15 @@ const Register = ({ navigation, route }) => {
   //check valid for email
   const checkEmailMatch = () => {
     var check = 0;
-     user.filter((item) => {
+    user.filter((item) => {
       if (item.email === state.email) {
         check++;
       }
     })
-    if(check>0){
+    if (check > 0) {
       return false;
     }
-    else{
+    else {
       return true;
     }
   }
@@ -66,10 +65,10 @@ const Register = ({ navigation, route }) => {
   const saveNewUser = async () => {
     if (state.email === '' || state.address === '' || state.password === ''
       || state.rpassword === '' || state.phone === '') {
-        setTitle('Bạn không được để trống!');
-        setnIcon('✖');
-        setColor('red');
-        toggleAlert();
+      setTitle('Bạn không được để trống!');
+      setnIcon('✖');
+      setColor('red');
+      toggleAlert();
     }
     else if (checkEmailMatch() == false) {
       setTitle('Email đã tồn tại!');
@@ -104,16 +103,16 @@ const Register = ({ navigation, route }) => {
           address: state.address,
           role: 0,
           imageUser: 'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png',
-          userLike:'noData',
-          userCart:'noData',
+          userLike: 'noData',
+          userCart: 'noData',
         })
-        
-        // navigation.navigate('Login');
+
         setTitle('Bạn đã đăng ký tài khoản thành công!');
         setnIcon('✔');
         setColor('green');
         toggleAlert();
-       
+        navigation.navigate('Login');
+
       } catch (error) {
         console.log(error);
       }
@@ -140,8 +139,8 @@ const Register = ({ navigation, route }) => {
         {/* Handle button register */}
 
       </ImageBackground>
-        {/* show dialog */}
-        <FancyAlert
+      {/* show dialog */}
+      <FancyAlert
         visible={visible}
         icon={<View style={{
           flex: 1,
@@ -155,9 +154,9 @@ const Register = ({ navigation, route }) => {
         style={{ backgroundColor: 'white' }}
       >
         <Text style={{ marginTop: -16, marginBottom: 32, }}>{title}</Text>
-      <View style={{paddingHorizontal: 30}}>
-      <Button style={{paddingHorizontal: 40}} title='Đóng' onPress={() => _closeApp()} />
-      </View>
+        <View style={{ paddingHorizontal: 30 }}>
+          <Button style={{ paddingHorizontal: 40 }} title='Đóng' onPress={() => _closeApp()} />
+        </View>
       </FancyAlert>
     </View>
   )

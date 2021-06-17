@@ -21,7 +21,6 @@ import Loading from '../Loading';
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 import { Button, Divider, Avatar } from 'react-native-elements';
 const List = (props) => {
-    const [index, setIndex] = useState(0);
 
     //dialog
     const [visible, setVisible] = React.useState(false);
@@ -35,29 +34,20 @@ const List = (props) => {
     const [nIcon, setnIcon] = useState();
     const [title, setTitle] = useState();
     const [color, setColor] = useState();
+    const [dataCart, setDataCart] = useState([])
     var userId = getUserId();
 
-    // var userCart = getUserCart();
-    // alert(getUserCar());
+    const [colorAlert, setColorAlert] = useState()
     //Get value of firebase
     const [loading, setLoading] = useState(true);
     const [food, setFood] = useState([]);
-    const [user, setUser] = useState();
-    const [data, setData] = useState();
-    const getUserById = async (id) => {
-        const dbRef = firebase.db.collection('users').doc(id);
-        const doc = await dbRef.get();
-        const user = doc.data();
-
-        setUser({
-            ...user,
-            id: doc.id
-        })
-        setLoading(false);
-    }
+  
     useEffect(() => {
         let isMounted = true;
-        firebase.db.collection('foods').onSnapshot(querySnapshot => {
+        
+        firebase.db.collection('foods')
+        .orderBy('sold', 'desc')
+        .onSnapshot(querySnapshot => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
                 const { name, linkImage, price, description, sold } = doc.data();
@@ -71,52 +61,61 @@ const List = (props) => {
                 })
             });
             setFood(food);
-            getUserById(userId);
             setDataSouce(food);
+            //read all information user with cart before
+            firebase.db.collection('addToCart').onSnapshot(querySnapshot => {
+                const dataCart = [];
+                querySnapshot.docs.forEach(doc => {
+                    const { idFood, idUser, } = doc.data();
+                    dataCart.push({
+                        id: doc.id,
+                        idFood,
+                        idUser
+                    })
+                });
+                setDataCart(dataCart);
+            })
+
         })
         return () => { isMounted = false };
     }, [])
-    // update cart of user
-    const updateCartForUser = async (idFood) => {
-        const dbRef = firebase.db.collection('users').doc(userId);
-        var strCart = idFood;
-        //if user is not like this food
-        var getItemIdFoodInSort = user.userCart.split("-");
-        let showArr = getItemIdFoodInSort.filter((item) => {
-            return item != 'noData';
-        })
-        //Check food vaild in list 
-        let check = false;
-        for (let i = 0; i < showArr.length; i++) {
-            if (showArr[i] == strCart) {
-                check = true;
-            }
-        }
-        if (check == true) {
-            setTitle('Bạn đã thêm món ăn này vào giỏ hàng rồi');
+    //add to list cart for user
+    const addDataCart = async (idFood) => {
+        let isMounted = true;
+        try {
+            await firebase.db.collection('addToCart').add({
+                idUser: userId,
+                idFood: idFood,
+                amountFood: 1
+            })
+            setTitle('Thêm món ăn vào giỏ hàng thành công^^');
             setnIcon('✔');
-            setColor('green');
+            setColor('red');
+            setColorAlert('green');
+            toggleAlert();
+
+        } catch (error) {
+            console.log(error);
+        }
+        return () => { isMounted = false };
+    }
+    // button add to cart
+    const updateCartForUser = async (idFood) => {
+        var checkCartExist = 0;
+        dataCart.filter((item) => {
+            if (item.idFood === idFood&&item.idUser===userId) {
+                checkCartExist++;
+            }
+        })
+        if (checkCartExist > 0) {
+            setTitle('Bạn đã thêm món ăn này vào giỏ hàng');
+            setnIcon('✔');
+            setColorAlert('green');
             toggleAlert();
         }
         else {
-            setTitle('Thêm thành công vào giỏ hàng');
-            setnIcon('✔');
-            setColor('green');
-            toggleAlert();
-            setData(user.userCart);
-            await dbRef.set({
-                password: user.password,
-                email: user.email,
-                phone: user.phone,
-                address: user.address,
-                role: 0,
-                imageUser: user.imageUser,
-                userLike: user.userLike,
-                userCart: data + '-' + strCart
-            })
-
+            addDataCart(idFood);
         }
-
     }
     //Handle seacrch
     const [query, setQuery] = useState();
@@ -155,11 +154,11 @@ const List = (props) => {
                         _search();
                     }}
                 />
-                <TouchableOpacity onPress={() => _search()}>
+                <TouchableOpacity onPress={() => props.navigation.navigate('CartScreen')}>
                     <FontAwesome style={{ paddingHorizontal: 10 }} name='shopping-cart' size={28} color='black' />
                 </TouchableOpacity>
             </View>
- 
+
             <FlatList style={{ padding: 15 }}
                 data={dataSouce}
 
@@ -196,7 +195,7 @@ const List = (props) => {
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    backgroundColor: (color),
+                    backgroundColor: (colorAlert),
                     borderRadius: 80,
                     width: '100%',
                 }}>

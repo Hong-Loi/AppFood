@@ -92,17 +92,18 @@ const Home = (props) => {
             {/* body here */}
 
             <ScrollView>
-                <View style={{ height: 170 }}>
+                <View style={{ height: 170,   backgroundColor: '#FFFFCC' }}>
                     <Swiper showsButtons={true} 
                     autoplay={true}
                     showsPagination={false}
+                    style={{ backgroundColor: '#FFFFCC' }}
                     >
                         {
                             dataHead.map(item => {
                                 return (
                                     <ListItem key={item.id} bottomDivider
                                     onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>
-                                        <Avatar style={{ width: '100%', height: 190}} rounded  source={{ uri: (item.linkImage) }} />  
+                                        <Avatar style={{ width: '100%', height: 190}}  source={{ uri: (item.linkImage) }} />  
                                     </ListItem>
                                 )
                             })
