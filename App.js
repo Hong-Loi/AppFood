@@ -8,7 +8,6 @@ import Register from './src/screens/Register';
 import Home from './src/screens/users/Home';
 import List from './src/screens/users/List';
 import Love from './src/screens/users/Love';
-import Loading from './src/screens/Loading';
 import HomeAdmin from './src/screens/admin/HomeAdmin';
 import AccountAdmin from './src/screens/admin/AccountAdmin';
 import FoodAdmin from './src/screens/admin/FoodAdmin';
@@ -25,6 +24,7 @@ import CreateFood from './src/screens/admin/CreateFood';
 import Introduce from './src/screens/users/Introduce';
 import Support from './src/screens/users/Support';
 import HistoryCart from './src/screens/users/HistoryCart';
+import DetailHistory from './src/screens/users/DetailHistory';
 
 
 const Stack = createStackNavigator();
@@ -56,7 +56,7 @@ function MyStackOfAdmin(){
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="HistoryCart" screenOptions={{
+    <Stack.Navigator initialRouteName="Login" screenOptions={{
         headerStyle: {
           backgroundColor: '#f4511e',
         },
@@ -74,6 +74,7 @@ export default function App() {
       <Stack.Screen name="DetailProduct2" component={DetailProduct2} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="SettingUser" component={SettingUser} options={{title: 'Cài đặt tài khoản'}} />
       <Stack.Screen name="HistoryCart" component={HistoryCart} options={{title: 'Lịch sử đơn hàng'}} />
+      <Stack.Screen name="DetailHistory" component={DetailHistory} options={{title: 'Chi tiết đơn hàng'}} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} options={{title: 'Đổi mật khẩu'}} />
       <Stack.Screen name="CartScreen" component={CartScreen} options={{title: 'Giỏ hàng'}} />
       <Stack.Screen name="Introduce" component={Introduce} options={{title: 'Giới thiệu'}} />

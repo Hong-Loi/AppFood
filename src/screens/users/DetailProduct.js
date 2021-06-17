@@ -181,7 +181,6 @@ const DetailProduct = (props) => {
             })
             setTitle('Thêm món ăn vào giỏ hàng thành công^^');
             setnIcon('✔');
-            setColor('red');
             setColorAlert('green');
             toggleAlert();
 

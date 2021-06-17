@@ -11,55 +11,58 @@ import { FancyAlert } from 'react-native-expo-fancy-alerts';
 const { width, height } = Dimensions.get('window');
 
 const HistoryCart = ({ navigation }) => {
+    var userId = getUserId();
     const [foodCart, setFoodCart] = useState([]);
-    const DATA = [
-        {
-            created_at: '17:06 17/6/2021',
-            status: 'Item 1',
-            total: '500000',
-        },
-        {
-            created_at: '17:06 17/6/2021',
-            status: 'Item 2',
-            total: '500000',
-        },
-        {
-            created_at: '17:06 17/6/2021',
-            status: 'Item 3',
-            total: '500000',
-        },
-        {
-            created_at: '17:06 17/6/2021',
-            status: 'First Item',
-            total: '500000',
-        },
-        {
-            created_at: '17:06 17/6/2021',
-            status: 'First Item',
-            total: '500000',
-        },
-    ];
+    const [filterCart, setFilterCart] = useState([]);
+    useEffect(() => {
+        firebase.db.collection('invoice')
+            // .where('idUser', '==',  userId)
+            .orderBy('createdAt', 'desc')
+            .onSnapshot(querySnapshot => {
+                const foodCart = [];
+                querySnapshot.docs.forEach(doc => {
+
+                    const { createdAt, status, idUser, total, } = doc.data();
+                    foodCart.push({
+                        id: doc.id,
+                        createdAt,
+                        status,
+                        idUser,
+                        total,
+                    })
+                });
+
+                setFoodCart(foodCart);
+                const filterCart = foodCart.filter((item) => {
+                    return item.idUser === userId;
+                })
+                setFilterCart(filterCart);
+                //sort by date
+            })
+    }, [])
     return (
         <View style={styles.container}>
             <FlatList style={{ padding: 15 }}
-                data={DATA}
+                data={filterCart}
                 renderItem={({ item, index }) => {
                     return (
 
-                        <View style={styles.bookContainer}>
-                            <View style={styles.dataContainer}>
-                                <Text numberOfLines={1} style={styles.title}>
-                                  Trạng thái: {item.status}
-                                </Text>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                    <Text style={styles.author}>đ{item.total}</Text>
-                                    <View  style={{marginLeft: 100 }} >
-                                        <Text style={{fontSize: 18}}>{item.created_at}</Text>
+                        <TouchableOpacity  onPress={() => navigation.navigate('DetailHistory', { createdAt: item.createdAt })}>
+                            <View style={styles.bookContainer}>
+                                <View style={styles.dataContainer}>
+                                    <Text numberOfLines={1} style={styles.title}>
+                                        Trạng thái: {item.status}
+                                    </Text>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                        <Text style={styles.author}>đ{item.total}</Text>
+                                        <View style={{ marginLeft: 120 }} >
+                                            <Text style={{ fontSize: 18 }}>{item.createdAt}</Text>
+                                        </View>
                                     </View>
-                                </View>
 
+                                </View>
                             </View>
-                        </View>
+                        </TouchableOpacity>
 
                     );
                 }}

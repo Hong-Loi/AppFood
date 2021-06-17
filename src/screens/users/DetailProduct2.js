@@ -69,8 +69,8 @@ const DetailProduct2 = (props) => {
                 });
                 setDataLike(dataLike);
             })
-              //read all information user with cart before
-              firebase.db.collection('addToCart').onSnapshot(querySnapshot => {
+            //read all information user with cart before
+            firebase.db.collection('addToCart').onSnapshot(querySnapshot => {
                 const dataCart = [];
                 querySnapshot.docs.forEach(doc => {
                     const { idFood, idUser, } = doc.data();
@@ -83,7 +83,7 @@ const DetailProduct2 = (props) => {
                 setDataCart(dataCart);
             })
 
-            
+
             seteDataFood(dataFood);
             let getTopViewFood = dataFood.sort(function (x, y) {
                 return y.View - x.View;
@@ -101,7 +101,7 @@ const DetailProduct2 = (props) => {
                     dataViewTwo.push(getTopViewFood[i]);
                 }
             }
-           
+
             setDataViewOne(dataViewOne);
             setDataViewTwo(dataViewTwo);
         })
@@ -135,9 +135,10 @@ const DetailProduct2 = (props) => {
         })
         setLoading(false);
     }
-   
+
     //when user want add it in list like
     const _deleteFoodUserLike = async () => {
+        let isMounted = true;
         let idLike = [];
         dataLike.filter((item) => {
             if (item.idFood === props.route.params.foodId && item.idUser == userId) {
@@ -148,7 +149,7 @@ const DetailProduct2 = (props) => {
         const dbRef = firebase.db.collection('usersLike').doc(idLike.id);
         await dbRef.delete();
         setColor('black');
-
+        return () => { isMounted = false };
     }
     //Add to list like in firebase
     const addDataLike = async () => {
@@ -180,7 +181,6 @@ const DetailProduct2 = (props) => {
             })
             setTitle('Thêm món ăn vào giỏ hàng thành công^^');
             setnIcon('✔');
-            setColor('red');
             setColorAlert('green');
             toggleAlert();
 
@@ -193,7 +193,7 @@ const DetailProduct2 = (props) => {
     const updateLike = async () => {
         var checkLikeExist = 0;
         dataLike.filter((item) => {
-            if (item.idFood === props.route.params.foodId&&item.idUser===userId) {
+            if (item.idFood === props.route.params.foodId && item.idUser === userId) {
                 checkLikeExist++;
             }
         })
@@ -213,7 +213,7 @@ const DetailProduct2 = (props) => {
     const updateCartForUser = async () => {
         var checkCartExist = 0;
         dataCart.filter((item) => {
-            if (item.idFood === props.route.params.foodId&&item.idUser===userId) {
+            if (item.idFood === props.route.params.foodId && item.idUser === userId) {
                 checkCartExist++;
             }
         })

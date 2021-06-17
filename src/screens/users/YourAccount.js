@@ -53,7 +53,7 @@ const YourAccount = (props) => {
             <View style={styles.body}>
                 <Card>
                     {/* Hitory */}
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={()=>props.navigation.navigate('HistoryCart')}>
                         <View style={styles.c1}>
                             <Text style={styles.t1}><FontAwesome name='history' size={23} color='black' />   Lịch sử đặt hàng</Text>
                             <Divider style={{ backgroundColor: 'black', marginTop: 20 }} />

@@ -21,8 +21,8 @@ import { FancyAlert } from 'react-native-expo-fancy-alerts';
 import { Button, Divider, Avatar } from 'react-native-elements';
 
 const { width, height } = Dimensions.get('window');
+
 const Love = (props) => {
-  
 
   //dialog
   const [visible, setVisible] = React.useState(false);
@@ -75,6 +75,17 @@ const Love = (props) => {
           })
         });
         setDataLike(dataLike);
+        //refresh data 
+        const filterData = [];
+        for (let x = 0; x < food.length; x++) {
+          for (let y = 0; y < dataLike.length; y++) {
+            if (food[x].id === dataLike[y].idFood && dataLike[y].idUser === userId) {
+              filterData.push(food[x]);
+            }
+          }
+        }
+        setFilterData(filterData);
+        setDataSouce(filterData);
       })
 
       //find by source
@@ -99,7 +110,7 @@ const Love = (props) => {
 
   //add to list cart for user
   const addDataCart = async (idFood) => {
-
+    let isMounted = true;
     try {
       await firebase.db.collection('addToCart').add({
         idUser: userId,
@@ -115,6 +126,7 @@ const Love = (props) => {
     } catch (error) {
       console.log(error);
     }
+    return () => { isMounted = false };
   }
   // button add to cart
   const updateCartForUser = async (idFood) => {
@@ -148,7 +160,7 @@ const Love = (props) => {
       setDataSouce(newData);
     }
   };
-  const _callAgain = useCallback(() => {
+  const onRefresh = useCallback(() => {
     const filterData = [];
     for (let x = 0; x < food.length; x++) {
       for (let y = 0; y < dataLike.length; y++) {
@@ -183,13 +195,18 @@ const Love = (props) => {
             _search();
           }}
         />
-        <TouchableOpacity onPress={() => _callAgain()}>
-          <FontAwesome style={{ paddingHorizontal: 10 }} name='bell' size={28} color='black' />
+        <TouchableOpacity onPress={() => props.navigation.navigate('CartScreen')}>
+          <FontAwesome style={{ paddingHorizontal: 10 }} name='shopping-cart' size={28} color='black' />
         </TouchableOpacity>
       </View>
 
       <FlatList style={{ padding: 15 }}
         data={dataSouce}
+        refreshControl={
+          <RefreshControl
+            onRefresh={onRefresh}
+          />
+        }
         renderItem={({ item, index }) => {
           return (
             <TouchableOpacity onPress={() => props.navigation.navigate('DetailProduct', { foodId: item.id })}>

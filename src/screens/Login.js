@@ -7,8 +7,6 @@ import firebase from '../database/firebase';
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
 let getId = '';
-let getLike='';
-let getCart='';
 
 const Login = (props) => {
   //dialog
@@ -58,8 +56,6 @@ const Login = (props) => {
       user.forEach((item) => {    
         if (state.email == item.email && state.password == item.password) {
           getId=item.id;
-          getLike=item.userLike;
-          getCart=item.userCart;
 
           //IF role = 0  then to admin
           if(item.role===1){
@@ -155,12 +151,7 @@ const Login = (props) => {
 export const getUserId = () =>{
   return getId;
 }
-export const getUserLike = ()=>{
- return getLike;
-}
-export const getUserCart = ()=>{
-  return getCart;
- }
+
 const styles = StyleSheet.create({
   sT1: {
     color: 'white',

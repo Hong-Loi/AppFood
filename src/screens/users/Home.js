@@ -21,18 +21,18 @@ const Home = (props) => {
     }
     useEffect(() => {
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-        firebase.db.collection('foods').onSnapshot(querySnapshot => {
+        firebase.db.collection('foods')
+        .onSnapshot(querySnapshot => {
             const food = [];
             querySnapshot.docs.forEach(doc => {
 
-                const { name, linkImage, price, sold, description, view, amount, createdAt } = doc.data();
+                const { name, linkImage, price, sold,  view, amount, createdAt } = doc.data();
                 food.push({
                     id: doc.id,
                     name,
                     linkImage,
                     price,
                     sold,
-                    description,
                     view,
                     amount,
                     createdAt
@@ -43,6 +43,7 @@ const Home = (props) => {
             })
             //get data form firebase
             setFood(food);
+            console.log(food);
             //sort by date
             let dateFood = food.filter(item => {
                 return item.view > 10;

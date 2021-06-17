@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, FlatList, TouchableOpacity, Dimensions } from 'react-native';
+import { RefreshControl, StyleSheet, View, Text, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import COLORS from '../components/colors';
 import firebase from '../../database/firebase';
@@ -71,6 +71,19 @@ const CartScreen = ({ navigation }) => {
                     })
                 });
                 setDataCart(dataCart);
+                const filterData = [];
+                var total = 0;
+                for (let x = 0; x < food.length; x++) {
+                    for (let y = 0; y < dataCart.length; y++) {
+                        if (food[x].id === dataCart[y].idFood && dataCart[y].idUser === userId) {
+                            filterData.push(food[x]);
+                            var toInt = parseInt(food[x].price);
+                            total += toInt;
+                        }
+                    }
+                }
+                setTotal(total);
+                setFilterData(filterData);
             })
 
         })
@@ -81,7 +94,7 @@ const CartScreen = ({ navigation }) => {
         setVisible(!visible);
     }
     //call again data flatlist
-    const _callAgain = useCallback(() => {
+    const onRefresh  = useCallback(() => {
         const filterData = [];
         var total = 0;
         for (let x = 0; x < food.length; x++) {
@@ -98,6 +111,7 @@ const CartScreen = ({ navigation }) => {
     })
     //Clear data after invoice and add data item
     const _clearData = async () => {
+        let isMounted = true;
         for (let y = 0; y < dataCart.length; y++) {
             if (dataCart[y].idUser === userId) {
                 try {
@@ -115,6 +129,7 @@ const CartScreen = ({ navigation }) => {
                 await dbRef.delete();
             }
         }
+        return () => { isMounted = false };
     }
 
     //Invoice
@@ -168,9 +183,13 @@ const CartScreen = ({ navigation }) => {
     return (
 
         <View style={styles.container}>
-            <Button title="Refresh" onPress={() => _callAgain()} />
             <FlatList style={{ padding: 15 }}
                 data={filterData}
+                refreshControl={
+                    <RefreshControl
+                        onRefresh={onRefresh}
+                    />
+                }
                 renderItem={({ item, index }) => {
                     return (
 

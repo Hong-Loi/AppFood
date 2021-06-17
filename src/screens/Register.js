@@ -95,6 +95,7 @@ const Register = ({ navigation, route }) => {
       toggleAlert();
     }
     else {
+      let isMounted = true;
       try {
         await firebase.db.collection('users').add({
           email: state.email,
@@ -102,9 +103,7 @@ const Register = ({ navigation, route }) => {
           phone: state.phone,
           address: state.address,
           role: 0,
-          imageUser: 'https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png',
-          userLike: 'noData',
-          userCart: 'noData',
+          imageUser: 'https://i.pinimg.com/originals/c2/71/cb/c271cbe21c6ffdf93c4592c5316006da.png',
         })
 
         setTitle('Bạn đã đăng ký tài khoản thành công!');
@@ -117,6 +116,7 @@ const Register = ({ navigation, route }) => {
         console.log(error);
       }
     }
+    return () => { isMounted = false };
   }
   return (
     <View style={styles.container}>
