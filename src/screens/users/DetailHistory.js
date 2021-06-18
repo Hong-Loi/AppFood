@@ -74,8 +74,7 @@ const DetailHistory = (props) => {
 
         //read all information user with cart before with if else
         firebase.db.collection('invoiceItem')
-            .where('idUser', '==', userId)
-            .where('createdAt', '==', props.route.params.createdAt)
+            .where('key', '==', props.route.params.key)
             .onSnapshot(querySnapshot => {
                 const dataCart = [];
                 querySnapshot.docs.forEach(doc => {

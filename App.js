@@ -25,6 +25,8 @@ import Introduce from './src/screens/users/Introduce';
 import Support from './src/screens/users/Support';
 import HistoryCart from './src/screens/users/HistoryCart';
 import DetailHistory from './src/screens/users/DetailHistory';
+import ManageCart from './src/screens/admin/ManageCart';
+import ManageHistoryDetail from './src/screens/admin/ManageHistoryDetail';
 
 
 const Stack = createStackNavigator();
@@ -68,12 +70,15 @@ export default function App() {
    
       <Stack.Screen name="Login"  component={Login} options={{title: 'Đăng nhập', headerShown: true}} />
       <Stack.Screen name="Register" component={Register} options={{title: 'Đăng ký', headerShown: true}} />
+      <Stack.Screen name="ManageCart" component={ManageCart} options={{title: 'Quan ly', headerShown: true}} />
       {/* Using this when login user successfull */}
+      <Stack.Screen name="HistoryCart" component={HistoryCart} options={{title: 'Lịch sử đơn hàng'}} />
+      <Stack.Screen name="ManageHistoryDetail" component={ManageHistoryDetail} options={{title: 'Chi tiết hàng'}} />
       <Stack.Screen name="Home" component={MyStackOfUser}  options={{title: 'Home', headerShown: false}} />
       <Stack.Screen name="DetailProduct" component={DetailProduct} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="DetailProduct2" component={DetailProduct2} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="SettingUser" component={SettingUser} options={{title: 'Cài đặt tài khoản'}} />
-      <Stack.Screen name="HistoryCart" component={HistoryCart} options={{title: 'Lịch sử đơn hàng'}} />
+    
       <Stack.Screen name="DetailHistory" component={DetailHistory} options={{title: 'Chi tiết đơn hàng'}} />
       <Stack.Screen name="ChangePassword" component={ChangePassword} options={{title: 'Đổi mật khẩu'}} />
       <Stack.Screen name="CartScreen" component={CartScreen} options={{title: 'Giỏ hàng'}} />

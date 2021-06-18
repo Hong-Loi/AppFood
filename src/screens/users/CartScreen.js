@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshControl, StyleSheet, View, Text, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import COLORS from '../components/colors';
 import firebase from '../../database/firebase';
 import Loading from '../Loading';
 import { Button, Avatar } from 'react-native-elements';
@@ -110,12 +109,13 @@ const CartScreen = ({ navigation }) => {
         setFilterData(filterData);
     })
     //Clear data after invoice and add data item
-    const _clearData = async () => {
+    const _clearData = async (key) => {
         let isMounted = true;
         for (let y = 0; y < dataCart.length; y++) {
             if (dataCart[y].idUser === userId) {
                 try {
                     await firebase.db.collection('invoiceItem').add({
+                        key: key,
                         idUser: userId,
                         createdAt: new Date().toLocaleString().replace(",", "").replace(/:.. /, " "),
                         idFood: dataCart[y].idFood,
@@ -135,21 +135,24 @@ const CartScreen = ({ navigation }) => {
     //Invoice
     const _invoice = async () => {
         //Check cart user not null to add
-
+        const dateNow = new Date().toLocaleString().replace(",", "").replace(/:.. /, " ");
+        const key= userId + "-"+ dateNow + "-" + total;
         if (total != 0) {
             try {
                 await firebase.db.collection('invoice').add({
+                    key: key,
                     idUser: userId,
-                    createdAt: new Date().toLocaleString().replace(",", "").replace(/:.. /, " "),
+                    createdAt:dateNow ,
                     status: 'Đang chờ',
-                    total: total
+                    total: total,
+                   
                 })
                 setTitle('Thanh toán thành công');
                 setnIcon('✔');
                 setColorAlert('green');
                 toggleAlert();
-                _clearData();
-
+                _clearData(key);
+               
             } catch (error) {
                 console.log(error);
             }
@@ -158,9 +161,8 @@ const CartScreen = ({ navigation }) => {
             setnIcon('✖');
             setColorAlert('red');
             toggleAlert();
-            _clearData();
         }
-
+       
     }
     //set food Count
     const _subValue = async (foodId) => {
