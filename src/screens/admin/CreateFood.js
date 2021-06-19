@@ -5,6 +5,7 @@ import { Input, Avatar } from 'react-native-elements';
 import { ScrollView } from "react-native-gesture-handler";
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../../database/firebase';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 const CreateFood = ({ navigation }) => {
@@ -43,7 +44,7 @@ const CreateFood = ({ navigation }) => {
     }
   }
   return (
-    <View  style={styles.container}>
+    <KeyboardAwareScrollView   style={styles.container}>
       <ScrollView style={{marginBottom: 140}}>
           <View style={styles.body2}>
           <Input label="Tên món ăn" placeholder='Tên món ăn'  autoCorrect={false}  leftIcon={{ type: 'material', name: 'forum', }} onChangeText={(value) => handleChangeText('name', value)} />
@@ -61,7 +62,7 @@ const CreateFood = ({ navigation }) => {
     <View style={styles.sButton}>
     <Button color='red' title='Thêm món ăn' onPress={() => saveNewFood()} />
   </View>
-    </View>
+  </KeyboardAwareScrollView>
   )
 };
 

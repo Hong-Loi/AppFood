@@ -175,7 +175,7 @@ const DetailHistory = (props) => {
                                         {item.name}
                                     </Text>
                                     <Text numberOfLines={4} style={styles.description}>
-                                        Đã bán:  {item.sold}
+                                    
                                     </Text>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <Text style={styles.author}>đ{item.price}</Text>

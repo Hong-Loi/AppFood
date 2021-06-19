@@ -48,9 +48,10 @@ function MyStackOfUser(){
 function MyStackOfAdmin(){
   return (
     <Tab.Navigator tabBarOptions={{labelStyle:{ fontSize: 14}, activeTintColor: '#FF0000', inactiveTintColor: 'black'}}>
-      <Tab.Screen  name="HomeAdmin" component={HomeAdmin} options={{tabBarLabel: 'Manage users', fontSize: 1, tabBarIcon: ({color}) => <FontAwesome name='users' size={23} color={color} />}}/>
-      <Tab.Screen name="FoodAdmin" component={FoodAdmin} options={{tabBarLabel: 'Manage food', tabBarIcon: ({color}) => <FontAwesome name='cutlery' size={23} color={color} />}} />
-      <Tab.Screen name="AccountAdmin" component={AccountAdmin} options={{tabBarLabel: 'Yêu thích', tabBarIcon: ({color}) => <FontAwesome name='heart' size={23} color={color} />}} />
+      <Tab.Screen  name="HomeAdmin" component={HomeAdmin} options={{tabBarLabel: 'Users', fontSize: 1, tabBarIcon: ({color}) => <FontAwesome name='users' size={23} color={color} />}}/>
+      <Tab.Screen name="FoodAdmin" component={FoodAdmin} options={{tabBarLabel: 'Foods', tabBarIcon: ({color}) => <FontAwesome name='cutlery' size={23} color={color} />}} />
+      <Tab.Screen name="ManageCart" component={ManageCart} options={{tabBarLabel: 'Carts', tabBarIcon: ({color}) => <FontAwesome name='shopping-cart' size={27} color={color} />}} />
+      <Tab.Screen name="AccountAdmin" component={AccountAdmin} options={{tabBarLabel: 'My', tabBarIcon: ({color}) => <FontAwesome name='heart' size={23} color={color} />}} />
     </Tab.Navigator>
   )
 }
@@ -58,7 +59,7 @@ function MyStackOfAdmin(){
 export default function App() {
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="Login" screenOptions={{
+    <Stack.Navigator initialRouteName="ManageHistoryDetai" screenOptions={{
         headerStyle: {
           backgroundColor: '#f4511e',
         },
@@ -73,7 +74,7 @@ export default function App() {
       <Stack.Screen name="ManageCart" component={ManageCart} options={{title: 'Quan ly', headerShown: true}} />
       {/* Using this when login user successfull */}
       <Stack.Screen name="HistoryCart" component={HistoryCart} options={{title: 'Lịch sử đơn hàng'}} />
-      <Stack.Screen name="ManageHistoryDetail" component={ManageHistoryDetail} options={{title: 'Chi tiết hàng'}} />
+      <Stack.Screen name="ManageHistoryDetail" component={ManageHistoryDetail} options={{title: 'Chi tiết đơn hàng'}} />
       <Stack.Screen name="Home" component={MyStackOfUser}  options={{title: 'Home', headerShown: false}} />
       <Stack.Screen name="DetailProduct" component={DetailProduct} options={{title: 'Chi tiết sản phẩm'}} />
       <Stack.Screen name="DetailProduct2" component={DetailProduct2} options={{title: 'Chi tiết sản phẩm'}} />

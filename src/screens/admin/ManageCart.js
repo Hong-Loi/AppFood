@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, FlatList, TouchableOpacity, Dimensions } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import COLORS from '../components/colors';
+import { SafeAreaView, StyleSheet, View, Dimensions, Text } from 'react-native';
 import firebase from '../../database/firebase';
 import Loading from '../Loading';
-import { Button, Avatar } from 'react-native-elements';
-import { getUserId } from '../Login';
+import { ListItem, Avatar } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 const { width, height } = Dimensions.get('window');
 
 const ManageCart = ({ navigation }) => {
-    var userId = getUserId();
     const [foodCart, setFoodCart] = useState([]);
     useEffect(() => {
         firebase.db.collection('invoice')
@@ -19,13 +15,14 @@ const ManageCart = ({ navigation }) => {
                 const foodCart = [];
                 querySnapshot.docs.forEach(doc => {
 
-                    const { createdAt, status, idUser, total, } = doc.data();
+                    const { createdAt, status, idUser, total, key } = doc.data();
                     foodCart.push({
                         id: doc.id,
                         createdAt,
                         status,
                         idUser,
                         total,
+                        key
                     })
                 });
 
@@ -34,30 +31,25 @@ const ManageCart = ({ navigation }) => {
     }, [])
     return (
         <View style={styles.container}>
-            <FlatList style={{ padding: 15 }}
-                data={foodCart}
-                renderItem={({ item, index }) => {
+            <View style={{ alignItems: 'center', backgroundColor: 'orange', paddingHorizontal: 20, padding: 20, justifyContent: 'center' }}>
+                <Text style={styles.tt}><FontAwesome name='shopping-cart' size={23} color='white' /> Quản lý người dùng</Text>
+            </View>
+            {
+                foodCart.map(item => {
                     return (
-                        <TouchableOpacity  onPress={() => navigation.navigate('ManageDetailHistory', { key: item.key })}>
-                            <View style={styles.bookContainer}>
-                                <View style={styles.dataContainer}>
-                                    <Text numberOfLines={1} style={styles.title}>
-                                        Trạng thái: {item.status}
-                                    </Text>
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                        <Text style={styles.author}>đ{item.total}</Text>
-                                        <View style={{ marginLeft: 120 }} >
-                                            <Text style={{ fontSize: 18 }}>{item.createdAt}</Text>
-                                        </View>
-                                    </View>
+                        <ListItem key={item.id} bottomDivider
+                            onPress={() => navigation.navigate('ManageHistoryDetail', { key: item.key, userId: item.idUser })}>
 
-                                </View>
-                            </View>
-                        </TouchableOpacity>
-
-                    );
-                }}
-            />
+                            <Avatar rounded style={styles.sAvatar} source={require('../../images/cart.png')} />
+                            <ListItem.Content>
+                                <ListItem.Title>{item.status}</ListItem.Title>
+                                <ListItem.Subtitle style={{ paddingTop: 10, color: 'red' }}>đ{item.total}</ListItem.Subtitle>
+                            </ListItem.Content>
+                            <ListItem.Chevron />
+                        </ListItem>
+                    )
+                })
+            }
         </View>
     );
 
@@ -66,26 +58,9 @@ const ManageCart = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#FFFFCC',
     },
 
 
-    bookContainer: {
-        flexDirection: 'row',
-        borderWidth: 2,
-        borderColor: '#99FF99',
-        borderRadius: 20,
-        marginBottom: 15
-    },
-    image: {
-        height: 100,
-        width: 120,
-    },
-    dataContainer: {
-        padding: 10,
-        paddingTop: 5,
-        width: width - 100,
-    },
     title: {
         fontSize: 17,
         fontWeight: 'bold',
@@ -95,11 +70,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: 'gray',
     },
-    author: {
-        fontSize: 18,
-        paddingTop: 20,
-        color: 'red'
-    },
+
+    sAvatar: {
+        width: 80,
+        height: 80
+    }
 });
 
 

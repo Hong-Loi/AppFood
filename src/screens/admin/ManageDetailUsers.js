@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ImageBackground, Button, Alert } from 'react-na
 import firebase from '../../database/firebase';
 import {  Input } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ManageDetailUsers = (props) => {
     const initialState = {
@@ -72,6 +73,7 @@ const ManageDetailUsers = (props) => {
     }
     return (
         <ImageBackground source={require('../../images/be.jpg')} style={styles.image}>
+            <KeyboardAwareScrollView>
             <View>
                 <Text style={styles.tTitle}>Manage user</Text>
             </View>
@@ -98,6 +100,7 @@ const ManageDetailUsers = (props) => {
                     <Button color='white' title='Delete User' onPress={() => openConfirmationAlert()} />
                 </View>
             </View>
+            </KeyboardAwareScrollView>
         </ImageBackground>
     )
 }

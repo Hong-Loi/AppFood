@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ImageBackground, StyleSheet, Text, View, Image, Keyboard } from "react-native";
+import { ImageBackground, StyleSheet, Text, View, Image, Keyboard,  } from "react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Input, Button } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '../database/firebase';
@@ -119,7 +120,7 @@ const Register = ({ navigation, route }) => {
     return () => { isMounted = false };
   }
   return (
-    <View style={styles.container}>
+    <KeyboardAwareScrollView style={styles.container}>
       <ImageBackground source={require('../images/main.jpg')} style={styles.image}>
 
         <View style={styles.body} onPress={() => Keyboard.dismiss()}>
@@ -158,7 +159,7 @@ const Register = ({ navigation, route }) => {
           <Button style={{ paddingHorizontal: 40 }} title='Đóng' onPress={() => _closeApp()} />
         </View>
       </FancyAlert>
-    </View>
+    </KeyboardAwareScrollView>
   )
 };
 

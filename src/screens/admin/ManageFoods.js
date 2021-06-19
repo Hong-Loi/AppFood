@@ -5,6 +5,7 @@ import firebase from '../../database/firebase';
 import { Input, Avatar, Button,Card } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Loading from '../Loading';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const ManageFoods = (props) => {
     const initialState = {
@@ -70,7 +71,7 @@ const ManageFoods = (props) => {
         )
     }
     return (
-    <View style={styles.container}>
+        <KeyboardAwareScrollView style={styles.container}>
             <ScrollView showsVerticalScrollIndicator={false}>
 
                 {/* Title */}
@@ -108,7 +109,7 @@ const ManageFoods = (props) => {
             <Button color='white' title='Delete food' onPress={() => openConfirmationAlert()} />
         </View>
     </View>
-    </View>
+    </KeyboardAwareScrollView>
     )
 }
 const styles = StyleSheet.create({

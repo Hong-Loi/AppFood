@@ -36,11 +36,12 @@ const FoodAdmin = (props) => {
         })
     }, [])
     return (
-        <View>
-            <ScrollView>
-                <View style={{ alignItems: 'center', backgroundColor: 'orange', paddingHorizontal: 20, padding: 20, justifyContent: 'center' }}>
+        <View style={{flex: 1}}>
+            <View style={{ alignItems: 'center', backgroundColor: 'orange', paddingHorizontal: 20, padding: 20, justifyContent: 'center' }}>
                     <Text style={styles.tt}><Ionicons name='earth' size={23} color='white' /> Quản lý món ăn</Text>
                 </View>
+            <ScrollView>
+                
                 {
                     food.map(item => {
                         return (

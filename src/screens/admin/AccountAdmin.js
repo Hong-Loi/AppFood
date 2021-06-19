@@ -9,7 +9,7 @@ const AccountAdmin = ({ navigation})=>{
                 Thi is Profile admin
             </Text>
            <View style={{backgroundColor: 'red'}}>
-           <Button color='white' title='Đăng xuất' onPress={()=>navigation.navigate('Login')}/>
+           <Button color='white' title='Đăng xuất' onPress={()=>navigation.replace('Login')}/>
            </View>
             
            

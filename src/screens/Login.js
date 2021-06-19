@@ -59,7 +59,7 @@ const Login = (props) => {
 
           //IF role = 0  then to admin
           if(item.role===1){
-            props.navigation.navigate('HomeAdmin',{
+            props.navigation.replace('HomeAdmin',{
               screen: 'HomeAdmin',
               params: {userId: item.id}
             } ,
@@ -102,7 +102,7 @@ const Login = (props) => {
     setState({ ...state, [name]: value })
   }
   const _onChagePageRegister = () => {
-    props.navigation.navigate('Register',{namexxx: 'hello wolrd'});
+    props.navigation.navigate('Register');
   }
   return (
     <View style={styles.container}>
