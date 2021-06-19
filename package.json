@@ -24,6 +24,7 @@
     "react-native-drop-down-item": "^1.1.0",
     "react-native-dropdown-picker": "^5.1.21",
     "react-native-elements": "^3.4.1",
+    "react-native-email": "^1.1.0",
     "react-native-expo-fancy-alerts": "^2.1.0",
     "react-native-gesture-handler": "~1.10.2",
     "react-native-keyboard-aware-scroll-view": "^0.9.4",

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ImageBackground, StyleSheet, Text, View, Image, Keyboard,  } from "react-native";
+import { ImageBackground, StyleSheet, Text, View, Image, Keyboard, } from "react-native";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Input, Button } from 'react-native-elements';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -7,6 +7,15 @@ import firebase from '../database/firebase';
 import { FancyAlert } from 'react-native-expo-fancy-alerts';
 
 const Register = ({ navigation, route }) => {
+  const validEmail = (text) => {
+    let reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w\w+)+$/;
+    if (reg.test(text) === false) {
+       return false;
+    }
+    else {
+     return true;
+    }
+  }
   //check user email valid
   const [visible, setVisible] = React.useState(false);
   const toggleAlert = React.useCallback(() => {
@@ -91,6 +100,12 @@ const Register = ({ navigation, route }) => {
     }
     else if (state.address.length < 10) {
       setTitle('Địa chỉ phải lớn hơn 10!');
+      setnIcon('✖');
+      setColor('red');
+      toggleAlert();
+    }
+    else if (validEmail(state.email)==false) {
+      setTitle('Email không đúng đinh dạng!');
       setnIcon('✖');
       setColor('red');
       toggleAlert();

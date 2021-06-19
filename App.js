@@ -27,6 +27,7 @@ import HistoryCart from './src/screens/users/HistoryCart';
 import DetailHistory from './src/screens/users/DetailHistory';
 import ManageCart from './src/screens/admin/ManageCart';
 import ManageHistoryDetail from './src/screens/admin/ManageHistoryDetail';
+import SendEmail from './src/screens/admin/SendEmail';
 
 
 const Stack = createStackNavigator();
@@ -90,7 +91,7 @@ export default function App() {
        <Stack.Screen name="ManageDetailUsers" component={ManageDetailUsers} options={{title: 'Manage user'}} />
        <Stack.Screen name="ManageFoods" component={ManageFoods} options={{title: 'Chi tiết món ăn'}} />
        <Stack.Screen name="CreateFood" component={CreateFood} options={{title: 'New food'}} />
-
+       <Stack.Screen name="SendEmail" component={SendEmail} options={{title: 'Send email'}} />
     </Stack.Navigator>
   
   </NavigationContainer>
